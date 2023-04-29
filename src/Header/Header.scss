@@ -1,0 +1,57 @@
+.header {
+  display: flex;
+  flex-direction: row;
+  background-color: #00006810;
+  padding: .3rem .45rem;
+
+  .nav {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    &>* {
+      height: 2rem;
+      line-height: 2rem;
+    }
+
+    .sectors {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .logo {
+      display: block;
+      color: #00b8ff;
+      font-family: 'DengXian';
+      font-size: 1.2rem;
+      padding: 0 .5rem;
+      filter: drop-shadow(0 0 .5px #00b8ff);
+      transition: filter linear .3s;
+      margin-right: .6rem;
+
+      &:hover {
+        filter: drop-shadow(0 0 4px #00b8ff);
+      }
+    }
+
+    .sector-link {
+      display: block;
+      padding: 0 1.2rem;
+      border-radius: .25rem;
+      transition: all ease-out .3s;
+
+      &:not(:last-of-type) {
+        margin-right: .4rem;
+      }
+
+      &:hover {
+        background-color: #00006824;
+      }
+
+      &:active {
+        border-radius: .75rem;
+      }
+    }
+  }
+
+}
