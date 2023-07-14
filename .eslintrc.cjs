@@ -13,5 +13,6 @@ module.exports = {
     'react-refresh/only-export-components': 'warn',
     semi: [1, 'always', { omitLastInOneLineBlock: true }],
     quotes: [1, 'single', { avoidEscape: true }],
+    '@typescript-eslint/no-explicit-any': 'off'
   },
 };

@@ -1,32 +1,15 @@
-import React from 'react';
 import ReactDOM from 'react-dom/client';
-import {
-  createBrowserRouter,
-  Outlet,
-  RouterProvider,
-} from 'react-router-dom';
 import './main.scss';
-import { IndexElement } from './Index/Index';
-import { Header } from './Header/Header';
+import { readConfig } from './utils/config';
+import App from './App';
 
-export const DocsUrl = '/';
+import './utils/utils';
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    errorElement: <><Header />载入时出现错误</>,
-    element: (<>
-      <Header />
-      <Outlet />
-    </>),
-    children: [
-      { path: '', element: <IndexElement /> }
-    ]
-  },
-]);
+export const docsUrl = '/';
+export const hostname = 'objflux.com';
+const hostnameGuard = /^objflux.com|localhost$/;
+if (!hostnameGuard.test(location.hostname) && readConfig('disableHostnameGuard') !== '1')
+  location.hostname = hostname;
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>,
-);
+
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(<App />);

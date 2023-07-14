@@ -1,22 +1,25 @@
 .header {
-  display: flex;
-  flex-direction: row;
-  background-color: #00006810;
+  background-color: #00006812;
   padding: .3rem .45rem;
+  box-shadow: 0 0 4px #1212121a;
+
+  @media (min-width:40rem) {
+    padding: .6rem 3rem;
+  }
+
+  @media (min-width:60rem) {
+    padding: .6rem 7rem;
+  }
 
   .nav {
     display: flex;
     flex-direction: row;
     align-items: center;
+    width: 100%;
 
     &>* {
       height: 2rem;
       line-height: 2rem;
-    }
-
-    .sectors {
-      display: flex;
-      flex-direction: row;
     }
 
     .logo {
@@ -27,31 +30,39 @@
       padding: 0 .5rem;
       filter: drop-shadow(0 0 .5px #00b8ff);
       transition: filter linear .3s;
-      margin-right: .6rem;
+      margin-right: min(.6rem, 2.5%);
 
       &:hover {
         filter: drop-shadow(0 0 4px #00b8ff);
       }
     }
 
-    .sector-link {
-      display: block;
-      padding: 0 1.2rem;
-      border-radius: .25rem;
-      transition: all ease-out .3s;
+    .sectors {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: row;
 
-      &:not(:last-of-type) {
-        margin-right: .4rem;
-      }
+      .sector-link {
+        display: block;
+        padding: 0 min(1.2rem, 5%);
+        border-radius: .25rem;
+        transition: all ease-out .3s;
 
-      &:hover {
-        background-color: #00006824;
-      }
+        &:not(:last-of-type) {
+          margin-right: .4rem;
+        }
 
-      &:active {
-        border-radius: .75rem;
+        &:hover {
+          background-color: #00006824;
+        }
+
+        &:active {
+          border-radius: .75rem;
+        }
       }
     }
+
+
   }
 
 }
