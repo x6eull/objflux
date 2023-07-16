@@ -18,13 +18,15 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+
+  &>.content {
+    display: block;
+    width: 100%;
+  }
+
 }
 
 a {
   color: inherit;
   text-decoration: unset;
-}
-
-.content {
-  flex-grow: 1;
 }

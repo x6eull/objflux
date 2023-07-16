@@ -3,7 +3,7 @@ import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
 import './main.scss';
 import { IndexElement } from './Index/Index';
 import { Header } from './Header/Header';
-import './dev/convert';
+// import './dev/convert';
 
 const router = createBrowserRouter([
   {
