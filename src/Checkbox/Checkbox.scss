@@ -1,0 +1,48 @@
+.checkbox {
+  display: flex;
+  flex-direction: row;
+  padding: .4rem 2.4rem;
+  align-items: center;
+  user-select: none;
+
+  &:not(:first-child) {
+    border-top: 1px solid #e5e5e5;
+  }
+
+  &:hover .mark {
+    background-color: #f6f6f6;
+  }
+
+  &:active .mark {
+    background-color: #f1f1f1;
+  }
+
+  .mark {
+    $size: 1.1rem;
+    box-sizing: border-box;
+    width: $size;
+    height: $size;
+    border: 2px solid #b3b3b3;
+    border-radius: 4px;
+    margin-right: .6rem;
+
+    &.checked {
+      background-color: #00b8ff;
+    }
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .title {
+      font-size: .9rem;
+    }
+
+    .desc {
+      font-size: .7rem;
+      color: #5e5e5e;
+    }
+  }
+}

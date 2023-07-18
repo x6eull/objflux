@@ -14,6 +14,11 @@ Object.defineProperties(Object.prototype, {
   }
 });
 
+let incrementalId = 0;
+export function newId() {
+  return incrementalId++;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare interface Object {
   withClass(c: string): StringRecord;

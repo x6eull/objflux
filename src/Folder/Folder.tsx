@@ -3,6 +3,10 @@ import { FolderIcon } from './FolderIcon';
 import './Folder.scss';
 import { FolderLevelContext } from './FolderLevelContext';
 
+/**
+ * 折叠组件。
+ * 此组件不受控，除第一次渲染外，`initialExpanded`会被忽略。
+ */
 export function Folder
   ({ title = '选项', desc, children, initialExpanded = false, onChange }: { title?: string, desc?: string, children?: React.ReactNode, initialExpanded?: boolean, onChange?: (expanded: boolean) => void }) {
   const [expanded, setExpanded] = useState<boolean>(initialExpanded);
