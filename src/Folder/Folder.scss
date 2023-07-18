@@ -1,14 +1,26 @@
-.moption {
+.folder {
   display: flex;
   margin: .2rem .6rem;
   flex-direction: column;
   cursor: default;
-  user-select: none;
   position: relative;
+  padding: 1px;
+  // border: 1px solid transparent;
+  // border-radius: 4.5px;
+  overflow: hidden;
+
+  &.nested {
+    margin: 0;
+    padding: 0;
+
+    &::after {
+      display: none;
+    }
+  }
 
   &::after {
     content: ' ';
-    overflow: hidden;
+    color: transparent;
     display: block;
     position: absolute;
     top: 0;
@@ -19,14 +31,25 @@
     border: 1px solid #e5e5e5;
     border-radius: 4.5px;
     pointer-events: none;
+    z-index: 200;
   }
 
   .control-card {
     display: flex;
-    background-color: #fdfcfb;
+    user-select: none;
+    $control-card-vertical-padding: .75rem;
+    $margin-for-desc: .2rem;
+    $title-font-size: 1rem;
+    $desc-font-size: .7rem;
+    padding: $control-card-vertical-padding 1.2rem;
+    flex-direction: row;
+    justify-content: space-between;
+    min-height: $title-font-size+$margin-for-desc+$desc-font-size;
+    box-sizing: content-box;
+    z-index: 120;
 
     &:hover {
-      background-color: #f6f6f6;
+      background-color: #f9f9f9;
     }
 
     &:active {
@@ -41,22 +64,20 @@
       border-bottom: 1px solid #e5e5e5;
     }
 
-    padding: 0 1.2rem;
-    flex-direction: row;
-    justify-content: space-between;
-    height: 3.8rem;
-
     .text {
       display: flex;
       flex-direction: column;
       justify-content: center;
 
       .title {
-        font-size: 1em;
+        font-size: $title-font-size;
+        line-height: $title-font-size;
       }
 
       .desc {
-        font-size: 0.75em;
+        margin-top: $margin-for-desc;
+        font-size: $desc-font-size;
+        line-height: $desc-font-size;
         color: #5e5e5e;
       }
     }
@@ -75,12 +96,14 @@
 
   .content-card {
     display: flex;
+    flex-direction: column;
     height: 0;
     overflow: hidden;
     position: relative;
     top: -.3rem;
-    opacity: .6;
-    transition: all .15s ease-out;
+    opacity: .4;
+    transition: all .2s ease-out;
+    z-index: 110;
 
     &.expanded {
       opacity: 1;
