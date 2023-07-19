@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import { Folder } from '../Folder/Folder';
 import { OptionGroup } from '../OptionGroup/OptionGroup';
 import { Checkbox } from '../Checkbox/Checkbox';
