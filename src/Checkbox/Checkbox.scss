@@ -5,6 +5,10 @@
   align-items: center;
   user-select: none;
 
+  $checked-color-dark: #005aad;
+  $checked-color: #005fba;
+  $checked-color-light: #006bcf;
+
   &:not(:first-child) {
     border-top: 1px solid #e5e5e5;
   }
@@ -13,8 +17,18 @@
     background-color: #f6f6f6;
   }
 
+  &:hover .mark.checked {
+    background-color: $checked-color-light;
+    border-color: $checked-color-light;
+  }
+
   &:active .mark {
-    background-color: #f1f1f1;
+    background-color: #ededed;
+  }
+
+  &:active .mark.checked {
+    background-color: $checked-color-dark;
+    border-color: $checked-color-dark;
   }
 
   .mark {
@@ -26,8 +40,33 @@
     border-radius: 4px;
     margin-right: .6rem;
 
+    .inner {
+      width: 100%;
+      height: 100%;
+      display: block;
+      opacity: 0;
+
+      .line {
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+        transform: rotate(-20deg);
+        transform-origin: center 80%;
+      }
+    }
+
     &.checked {
-      background-color: #00b8ff;
+      background-color: $checked-color;
+      border-color: $checked-color;
+
+      .inner {
+        opacity: 1;
+
+        .line {
+          stroke-dashoffset: 0;
+          transform: rotate(0deg);
+          transition: stroke-dashoffset cubic-bezier(0.13, 0.81, 0.37, 0.9) 0.3s, transform cubic-bezier(0.22, 1.25, 0.37, 1.52) 0.44s;
+        }
+      }
     }
   }
 

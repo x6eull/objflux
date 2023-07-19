@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react';
 import './Checkbox.scss';
 import { FolderLevelContext } from '../Folder/FolderLevelContext';
+import { CheckboxIcon } from './CheckboxIcon';
 
 //TODO 选中/未选中的视觉效果（含动画）
 /**
@@ -16,7 +17,9 @@ export function Checkbox({ title, desc, initialChecked, checked, onChange }: { t
     setStateChecked(nChecked);
     onChange?.(nChecked);
   }}>
-    <div className={'mark' + (checked ? ' checked' : '')} />
+    <div className={'mark' + (checked ? ' checked' : '')}>
+      <CheckboxIcon className='inner' />
+    </div>
     <div className='text'>
       <div className='title'>{title}</div>
       {desc ? (<div className='desc'>{desc}</div>) : (<></>)}

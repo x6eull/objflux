@@ -87,6 +87,7 @@
       width: 1rem;
       flex-direction: column;
       justify-content: center;
+      transition: transform cubic-bezier(0.18, 0.91, 0.2, 1.21) 0.4s;
 
       &.expanded {
         transform: rotate(180deg);
