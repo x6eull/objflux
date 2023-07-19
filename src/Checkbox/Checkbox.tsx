@@ -18,7 +18,9 @@ export function Checkbox({ title, desc, initialChecked, checked, onChange }: { t
     onChange?.(nChecked);
   }}>
     <div className={'mark' + (checked ? ' checked' : '')}>
-      <CheckboxIcon className='inner' />
+      <div className='inner'>
+        <CheckboxIcon />
+      </div>
     </div>
     <div className='text'>
       <div className='title'>{title}</div>

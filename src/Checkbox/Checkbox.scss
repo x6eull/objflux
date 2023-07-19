@@ -39,6 +39,7 @@
     border: 2px solid #b3b3b3;
     border-radius: 4px;
     margin-right: .6rem;
+    font-size: 0; //防止空格影响布局
 
     .inner {
       width: 100%;
@@ -50,7 +51,7 @@
         stroke-dasharray: 1;
         stroke-dashoffset: 1;
         transform: rotate(-20deg);
-        transform-origin: center 80%;
+        transform-origin: 45% 75%;
       }
     }
 
