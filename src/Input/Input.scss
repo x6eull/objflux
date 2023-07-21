@@ -1,0 +1,116 @@
+.input {
+    padding: .4rem 2.4rem;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+
+    &:not(:first-child) {
+        border-top: 1px solid #e5e5e5;
+    }
+
+    .text {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin-right: .6rem;
+        user-select: none;
+        -webkit-user-select: none;
+
+        .title {
+            font-size: .9rem;
+        }
+
+        .desc {
+            font-size: .7rem;
+            color: #5e5e5e;
+        }
+    }
+
+    .textarea {
+        height: 1.8em;
+        font-weight: lighter;
+        font-size: medium;
+        outline: none;
+        border: none;
+        border-color: #ccc;
+        border-bottom-width: 1.5px;
+        border-bottom-style: solid;
+        min-width: 0;
+        flex: 1;
+        transition: border-color ease 0.1s, background-color ease 0.1s;
+        padding: 5px 10px;
+
+        &:focus {
+            border-color: #00b8ff;
+            background-color: #f5fcff;
+            color: #084679;
+
+            &::placeholder {
+                color: #88d4f2;
+            }
+        }
+
+        &::placeholder {
+            color: #ccc;
+        }
+
+        &.error {
+            border-color: #e6575e;
+            color: #bd121a;
+
+            &:focus {
+                background-color: #fff7f7;
+
+                &::placeholder {
+                    color: #f28b90;
+                }
+            }
+
+            &::selection {
+                background-color: #ed5959;
+                color: white;
+            }
+        }
+    }
+
+    &.seperated-input {
+        align-items: unset;
+        display: block;
+
+        .text {
+            margin-right: unset;
+            flex-direction: row;
+            align-items: baseline;
+            justify-content: start;
+
+            .title {
+                margin-right: .4em;
+            }
+
+            &.seperated-text {
+                display: block;
+            }
+        }
+
+        .textarea {
+            width: 100%;
+        }
+
+        textarea.textarea {
+            margin-top: 8px;
+        }
+    }
+
+    &.multiline-input {
+        align-items: start;
+
+        textarea.textarea {
+            height: unset;
+            line-height: 1.5em;
+            resize: none;
+            font-family: unset;
+            border-width: 1.5px;
+            border-style: solid;
+        }
+    }
+}

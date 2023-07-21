@@ -3,6 +3,7 @@
   padding: .3rem .45rem;
   box-shadow: 0 0 4px #1212121a;
   user-select: none;
+  -webkit-user-select: none;  // 兼容 Safari 浏览器
 
   @media (min-width:40rem) {
     padding: .6rem 3rem;

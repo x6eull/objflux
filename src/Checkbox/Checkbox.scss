@@ -4,6 +4,7 @@
   padding: .4rem 2.4rem;
   align-items: center;
   user-select: none;
+  -webkit-user-select: none;  // 兼容 Safari 浏览器
 
   $checked-color-dark: #005aad;
   $checked-color: #005fba;
