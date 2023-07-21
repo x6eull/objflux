@@ -25,8 +25,8 @@ export interface Type {
   optional?: boolean;
 }
 
-interface SimpleArrayType extends Type { element: Type; }
-interface OptionalType<T extends Type> extends Type {
+declare interface SimpleArrayType extends Type { element: Type; }
+declare interface OptionalType<T extends Type> extends Type {
   expression: `${T['expression']}?`;
   optional: true;
 }
@@ -36,88 +36,135 @@ function toOptional<T extends Type>(type: T): OptionalType<T> {
     throw new Error('无法重复设置类型的可选性');
   return { ...type, optional: true, expression: type.expression + '?' } as OptionalType<T>;
 }
+declare interface ObjectType extends Type {
+  expression: `{${string}}`;
+  members: { [name: string]: Type };
+}
+function getObjectTypeExpression(members: { [name: string]: Type }): `{${string}}` {
+  return `{${Object.entries(members).map(([k, v]) => `${k}:${v.expression}`).join(';')}}`;
+}
 
-interface StringType extends Type, StringRestriction { expression: 'string'; }
-interface NumberType extends Type, NumberRestriction { expression: 'number'; }
-interface BooleanType extends Type { expression: 'boolean' }
+declare interface StringType extends Type, StringRestriction { expression: 'string'; }
+declare interface NumberType extends Type, NumberRestriction { expression: 'number'; }
+declare interface BooleanType extends Type { expression: 'boolean' }
 
-export function parseParameter(node: ts.ParameterDeclaration): Parameter {
-  if (node.name.kind !== ts.SyntaxKind.Identifier)
-    throw new Error('无法解析参数名');
-  const devName = node.name.getText();
+/**撤销ts将"\等进行转义 */
+function parseEscapedText(eText: string) { return JSON.parse(`"${eText}"`) }
+
+export function parseParameter(node: ts.ParameterDeclaration, index?: number): Parameter {
+  let devName: string;
+  if (ts.isIdentifier(node.name))
+    devName = node.name.getText();
+  else if (ts.isObjectBindingPattern(node.name))
+    devName = `__objectPara${index ?? ''}`;
+  else throw new Error(`无法解析参数${index ?? ''}`);
   if (!node.type) throw new Error(`未找到${devName}的类型参数`);
   if (node.dotDotDotToken) throw new Error(`无法解析剩余参数${devName}`);
   const type = parseType(node.type, !!node.questionToken);
   return { devName, displayName: devName, type };
 }
 
-export function parseType(node: ts.TypeNode, optional: boolean): Type {
-  function parseKeyword(node: ts.TypeNode): Type {
-    switch (node.kind) {
-      case ts.SyntaxKind.StringKeyword:
-        return { expression: 'string' };
-      case ts.SyntaxKind.NumberKeyword:
-        return { expression: 'number' };
-      case ts.SyntaxKind.BooleanKeyword:
-        return { expression: 'boolean' };
-      case ts.SyntaxKind.TypeReference: {
-        const n = node as ts.TypeReferenceNode;
-        const ta = n.typeArguments?.[0];
-        const restriction = {} as StringRecord;
-        if (!ta)
-          throw new Error('无法解析约束:类型参数数量无效');
-        else {
-          if (ts.isTypeLiteralNode(ta)) {
-            //考虑：转换;'后使用JSON.parse?
-            ta.members.forEach(m => {
-              if (ts.isPropertySignature(m)) {
-                const mtype = m.type;
-                if (!mtype)
-                  throw new Error('无法解析约束:指定属性缺少类型');
-                //TODO 支持类型引用?
-                if (ts.isLiteralTypeNode(mtype)) {
-                  const lt = mtype.literal;
-                  let value;
-                  if (ts.isStringLiteral(lt))
-                    //lt.text可处理双引号和转义字符
-                    value = JSON.parse(`"${lt.text}"`);
-                  else if (ts.isNumericLiteral(lt))
-                    value = Number(lt.getText());
-                  //TODO 支持BigIntLiteral?
-                  else throw new Error('无法解析约束:指定属性缺少类型');
-                  restriction[(m.name as ts.Identifier).getText()] = value;
-                }
-                else throw new Error('无法解析约束:指定属性字面量无效');
-              }
-              else throw new Error('无法解析约束:指定类型参数中包含无效成员');
-            });
-          }
-          else throw new Error('无法解析约束:无法解析指定类型参数');
+export function parseType(node: ts.TypeNode, optional = false): Type {
+  let result: Type;
+  switch (node.kind) {
+    case ts.SyntaxKind.StringKeyword:
+      result = { expression: 'string' };
+      break;
+    case ts.SyntaxKind.NumberKeyword:
+      result = { expression: 'number' };
+      break;
+    case ts.SyntaxKind.BooleanKeyword:
+      result = { expression: 'boolean' };
+      break;
+    case ts.SyntaxKind.TypeReference: {
+      const n = node as ts.TypeReferenceNode;
+      const ta = n.typeArguments?.[0];
+      let restriction = {} as StringRecord;
+      if (!ta)
+        throw new Error('无法解析约束:类型参数数量无效');
+      else {
+        if (ts.isTypeLiteralNode(ta)) {
+          //考虑：转换;'后使用JSON.parse?
+          restriction = parseTypeLiteralAsRestriction(ta);
         }
-        let result: Type;
-        const trefName = n.typeName.getText();
-        switch (trefName) {
-          case 'OfString':
-            result = { expression: 'string' };
-            break;
-          case 'OfNumber':
-            result = { expression: 'number' };
-            break;
-          default:
-            throw new Error(`'4暂不支持此类型:${trefName}`);
-        }
-        return Object.assign(restriction, result);
+        else throw new Error('无法解析约束:无法解析指定类型参数');
       }
+      let expResult: Type;
+      const trefName = n.typeName.getText();
+      switch (trefName) {
+        case 'OfString':
+          expResult = { expression: 'string' };
+          break;
+        case 'OfNumber':
+          expResult = { expression: 'number' };
+          break;
+        default:
+          throw new Error(`暂不支持此类型:${trefName}`);
+      }
+      result = Object.assign(restriction, expResult);
+      break;
     }
-    throw new Error(`无法解析的类型:${node.getText()}`);
+    case ts.SyntaxKind.TypeLiteral:
+      result = parseTypeLiteralAsObjectType(node as ts.TypeLiteralNode);
+      break;
+    default:
+      throw new Error(`无法解析的类型:${node.getText()}`);
   }
-  const t = parseKeyword(node);
   if (optional)
-    return toOptional(t);
-  return t;
+    return toOptional(result);
+  return result;
 }
 
-export async function parse(code: string) {
+export function parseTypeLiteralAsObjectType(node: ts.TypeLiteralNode): ObjectType {
+  const members: { [name: string]: Type } = {};
+  node.members.forEach((m, i) => {
+    if (ts.isPropertySignature(m)) {
+      let mtext: string;
+      if ('text' in m.name)
+        mtext = parseEscapedText(m.name.text);
+      else
+        mtext = m.name.getText();
+      if (!m.type) throw new Error(`成员${i}(${mtext})无效`);
+      members[mtext] = parseType(m.type, !!m.questionToken);
+    } else throw new Error(`成员${i}无效`);
+  });
+  return { expression: getObjectTypeExpression(members), members };
+}
+
+export function parseTypeLiteralAsRestriction(node: ts.TypeLiteralNode): StringRecord {
+  const result: StringRecord = {};
+  node.members.forEach(m => {
+    if (ts.isPropertySignature(m)) {
+      const mtype = m.type;
+      if (!mtype)
+        throw new Error('无法解析约束:指定属性缺少类型');
+      //TODO 支持类型引用?
+      if (ts.isLiteralTypeNode(mtype)) {
+        const lt = mtype.literal;
+        let value;
+        if (ts.isStringLiteral(lt))
+          value = parseEscapedText(lt.text);
+        else if (ts.isNumericLiteral(lt))
+          value = Number(lt.text);
+        else if (ts.isBigIntLiteral(lt)) {
+          const biText = lt.text;
+          //去除末尾n
+          value = BigInt(biText.substring(0, biText.length - 1));
+        }
+        else throw new Error('无法解析约束:指定属性类型无效');
+        result[(m.name as ts.Identifier).getText()] = value;
+      }
+      else if (ts.isTypeLiteralNode(mtype)) {
+        result[(m.name as ts.Identifier).getText()] = parseTypeLiteralAsRestriction(mtype);
+      }
+      else throw new Error('无法解析约束:指定属性字面量无效');
+    }
+    else throw new Error('无法解析约束:指定类型参数中包含无效成员');
+  });
+  return result;
+}
+
+export async function parseCode(code: string) {
   const fsMap = new Map<string, string>();
   fsMap.set('of.lib.d.ts', OfLib);
   const system = createSystem(fsMap);
@@ -134,8 +181,8 @@ export async function parse(code: string) {
               if (exportName)
                 throw new Error('存在多个导出函数');
               exportName = child.name?.getText();
-              child.parameters.forEach(p => {
-                const para = parseParameter(p);
+              child.parameters.forEach((p, i) => {
+                const para = parseParameter(p, i);
                 exportParameters.push(para);
               });
 
@@ -156,4 +203,4 @@ export async function parse(code: string) {
 }
 
 //DEBUG only
-(window as any).parse = parse;
+(window as any).parse = parseCode;

@@ -19,9 +19,10 @@ export function newId() {
   return incrementalId++;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-declare interface Object {
-  withClass(c: string): StringRecord;
+declare global {
+  interface Object {
+    withClass(c: string): StringRecord;
+  }
 }
 
 export type AnyRecord = Record<string | number | symbol, any>;
