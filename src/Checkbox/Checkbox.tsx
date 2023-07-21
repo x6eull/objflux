@@ -3,7 +3,6 @@ import './Checkbox.scss';
 import { FolderLevelContext } from '../Folder/FolderLevelContext';
 import { CheckboxIcon } from './CheckboxIcon';
 
-//TODO 选中/未选中的视觉效果（含动画）
 /**
  * 复选框。
  * 此组件可以受控（指定`checked`则受控）。
