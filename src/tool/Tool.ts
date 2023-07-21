@@ -44,7 +44,7 @@ interface BooleanType extends Type { expression: 'boolean' }
 export function parseParameter(node: ts.ParameterDeclaration): Parameter {
   if (node.name.kind !== ts.SyntaxKind.Identifier)
     throw new Error('无法解析参数名');
-  const devName = node.name.getFullText();
+  const devName = node.name.getText();
   if (!node.type) throw new Error(`未找到${devName}的类型参数`);
   if (node.dotDotDotToken) throw new Error(`无法解析剩余参数${devName}`);
   const type = parseType(node.type, !!node.questionToken);
@@ -68,22 +68,24 @@ export function parseType(node: ts.TypeNode, optional: boolean): Type {
           throw new Error('无法解析约束:类型参数数量无效');
         else {
           if (ts.isTypeLiteralNode(ta)) {
+            //考虑：转换;'后使用JSON.parse?
             ta.members.forEach(m => {
               if (ts.isPropertySignature(m)) {
                 const mtype = m.type;
                 if (!mtype)
                   throw new Error('无法解析约束:指定属性缺少类型');
-                //TODO 支持类型引用？
+                //TODO 支持类型引用?
                 if (ts.isLiteralTypeNode(mtype)) {
                   const lt = mtype.literal;
                   let value;
                   if (ts.isStringLiteral(lt))
-                    value = lt.getFullText();
+                    //lt.text可处理双引号和转义字符
+                    value = JSON.parse(`"${lt.text}"`);
                   else if (ts.isNumericLiteral(lt))
-                    value = Number(lt.getFullText());
+                    value = Number(lt.getText());
                   //TODO 支持BigIntLiteral?
                   else throw new Error('无法解析约束:指定属性缺少类型');
-                  restriction[(m.name as ts.Identifier).getFullText()] = value;
+                  restriction[(m.name as ts.Identifier).getText()] = value;
                 }
                 else throw new Error('无法解析约束:指定属性字面量无效');
               }
@@ -91,10 +93,9 @@ export function parseType(node: ts.TypeNode, optional: boolean): Type {
             });
           }
           else throw new Error('无法解析约束:无法解析指定类型参数');
-
         }
         let result: Type;
-        const trefName = n.typeName.getFullText();
+        const trefName = n.typeName.getText();
         switch (trefName) {
           case 'OfString':
             result = { expression: 'string' };
@@ -108,7 +109,7 @@ export function parseType(node: ts.TypeNode, optional: boolean): Type {
         return Object.assign(restriction, result);
       }
     }
-    throw new Error(`无法解析的类型:${node.getFullText()}`);
+    throw new Error(`无法解析的类型:${node.getText()}`);
   }
   const t = parseKeyword(node);
   if (optional)

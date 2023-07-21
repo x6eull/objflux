@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 declare type StringRestriction = {
-  length?: number | [number?, number?];
+  // length?: number | [number?, number?];
   maxLength?: number;
   minLength?: number;
   validate?: string;
@@ -10,7 +10,7 @@ declare type OfString<_T extends StringRestriction> = string;
 
 declare type NumberRestriction = {
   integer?: boolean,
-  value?: [number?, number?],
+  // value?: [number?, number?],
   maxValue?: number,
   minValue?: number
 }
