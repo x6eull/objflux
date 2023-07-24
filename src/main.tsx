@@ -12,5 +12,5 @@ if (!hostnameGuard.test(location.hostname) && readConfig('disableHostnameGuard')
   location.hostname = hostname;
 
 if (!(/^https?:\/\/(localhost|127\.0\.0\.1)/.test(location.href)))
-  throw new Error('Invalid href');
+  console.error('Invalid href');
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(<App />);
