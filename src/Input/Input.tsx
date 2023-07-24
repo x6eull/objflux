@@ -28,11 +28,11 @@ export function Input(
             {desc ? (<div className='desc'>{desc}</div>) : (<></>)}
         </div>
         {allowMultiline ? (<textarea placeholder={placeholder} className={'textarea' + (error ? ' error' : '')} onChange={e => {
-            let _result = e.target.value;
-            _result = allowMultiline ? _result : _result.replace(/\n/g, '');
+            const _result = e.target.value;
+            //_result = allowMultiline ? _result : _result.replace(/\n/g, '');
 
             setStateValue(_result);
-            onChange?.(_result ?? '');
+            onChange?.(_result);
         }} style={{
             height: `${(Math.max(
                 Math.min(
@@ -41,11 +41,10 @@ export function Input(
                 ),
                 minViewLines
             )) * 1.5}em`
-        }}>
-            {value}
+        }} value={value}>
         </textarea>) : (<input placeholder={placeholder} className={'textarea' + (error ? ' error' : '')} value={value} onChange={e => {
-            let _result = e.target.value;
-            _result = allowMultiline ? _result : _result.replace(/\n/g, '');
+            const _result = e.target.value;
+            // _result = allowMultiline ? _result : _result.replace(/\n/g, '');
 
             setStateValue(_result);
             onChange?.(_result ?? '');

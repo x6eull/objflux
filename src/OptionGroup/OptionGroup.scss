@@ -5,8 +5,8 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  -webkit-user-select: none; // 兼容 Safari 浏览器
   user-select: none;
-  -webkit-user-select: none;  // 兼容 Safari 浏览器
 
   .option {
     &:not(:first-child) {
