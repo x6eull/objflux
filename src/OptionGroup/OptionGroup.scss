@@ -9,6 +9,8 @@
   user-select: none;
 
   .option {
+    cursor: pointer;
+
     &:not(:first-child) {
       border-top: 1px solid #e5e5e5;
     }
@@ -27,6 +29,7 @@
     }
 
     &.selected {
+      cursor: default;
       background-color: #f3f3f3;
 
       &:hover {

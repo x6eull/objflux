@@ -38,6 +38,7 @@
     display: flex;
     -webkit-user-select: none; // 兼容 Safari 浏览器
     user-select: none;
+    cursor: pointer;
     $control-card-vertical-padding: .75rem;
     $margin-for-desc: .2rem;
     $title-font-size: 1rem;
