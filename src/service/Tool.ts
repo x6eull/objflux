@@ -201,6 +201,3 @@ export async function parseCode(code: string) {
   const module = await import(/* @vite-ignore */url);
   return { out: emitedText, exportName, para: exportParameters, module, func: module[exportName] };
 }
-
-//DEBUG only
-(window as any).parse = parseCode;

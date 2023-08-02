@@ -2,7 +2,6 @@ import { Folder } from '../Folder/Folder';
 import { OptionGroup } from '../OptionGroup/OptionGroup';
 import { Checkbox } from '../Checkbox/Checkbox';
 
-import '../tool/Tool';
 import { Input } from '../Input/Input';
 
 export function IndexElement() {

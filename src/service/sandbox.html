@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:x-icon," />
+</head>
+
+<body>
+  <script type="module">
+    (() => {
+      Object.defineProperty(window, '___of_sandbox_values', { value: [], writable: false, configurable: false });
+      window.addEventListener('message', (ev) => {
+        if (ev.source !== pt)
+          return;
+        if (typeof mk !== 'string') {
+          if (ev.data.type === 'init.ok') {
+            mk = ev.data.mk;
+          }
+        }
+        if (ev.data.mk !== mk)
+          return;
+        switch (ev.data.type) {
+          case 'eval.code': {
+            sendBack({ type: 'eval.result', data: eval(ev.data.data), msgId: ev.data.msgId, sk })
+          }
+          case 'store.code': {
+            window.___of_sandbox_values.push(eval(ev.data.data));
+            sendBack({ type: 'store.index', data: window.___of_sandbox_values.length - 1, msgId: ev.data.msgId, sk })
+          }
+        }
+      });
+      function sendBack(fullData) {
+        parent.postMessage(fullData, '*');
+      }
+      const pt = parent;
+      let mk;
+      const sk = (10000000 + Math.floor(Math.random() * 89999999)).toString();
+      pt.postMessage({ type: 'init.ok', sk }, '*');
+    })();
+  </script>
+</body>
+
+</html>
