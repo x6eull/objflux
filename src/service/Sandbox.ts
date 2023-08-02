@@ -7,7 +7,7 @@ export class Sandbox {
   readonly #source: Window;
   readonly #mk: string;
   readonly #initWaitlist: (() => void)[] = [];
-  readonly #evalWaitlist: Map<number, (value: any) => void> = new Map();
+  readonly #evalWaitlist: Map<number, [(value: any) => void, (reason: any) => void]> = new Map();
   #sk?: string;
   readonly id: number = sbId++;
   constructor() {
@@ -24,21 +24,21 @@ export class Sandbox {
 
   init(): Promise<void> {
     if (typeof this.#sk === 'string') return Promise.resolve();
-    return new Promise((r) => this.#initWaitlist.push(r));
+    return new Promise((rs) => this.#initWaitlist.push(rs));
   }
 
   eval(code: string): Promise<any> {
-    return new Promise((r) => {
+    return new Promise((rs, rj) => {
       const i = this.#send(code, 'eval.code');
-      this.#evalWaitlist.set(i, r);
+      this.#evalWaitlist.set(i, [rs, rj]);
     });
   }
 
   /**运行指定代码，并且将结果保存在沙箱内 */
   store(code: string): Promise<number> {
-    return new Promise((r) => {
+    return new Promise((rs, rj) => {
       const i = this.#send(code, 'store.code');
-      this.#evalWaitlist.set(i, r);
+      this.#evalWaitlist.set(i, [rs, rj]);
     });
   }
 
@@ -63,7 +63,10 @@ export class Sandbox {
       case 'eval.result': {
         const v = this.#evalWaitlist.get(ev.data.msgId);
         if (v) {
-          v(ev.data.data);
+          if (ev.data.error)
+            v[1](ev.data.error);
+          else
+            v[0](ev.data.data);
           this.#evalWaitlist.delete(ev.data.msgId);
         }
         break;
@@ -71,7 +74,10 @@ export class Sandbox {
       case 'store.index': {
         const v = this.#evalWaitlist.get(ev.data.msgId);
         if (v) {
-          v(ev.data.data);
+          if (ev.data.error)
+            v[1](ev.data.error);
+          else
+            v[0](ev.data.data);
           this.#evalWaitlist.delete(ev.data.msgId);
         }
         break;

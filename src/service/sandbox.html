@@ -9,7 +9,7 @@
 <body>
   <script type="module">
     (() => {
-      Object.defineProperty(window, '___of_sandbox_values', { value: [], writable: false, configurable: false });
+      let ___store = [];
       window.addEventListener('message', (ev) => {
         if (ev.source !== pt)
           return;
@@ -22,11 +22,23 @@
           return;
         switch (ev.data.type) {
           case 'eval.code': {
-            sendBack({ type: 'eval.result', data: eval(ev.data.data), msgId: ev.data.msgId, sk })
+            try {
+              const result = eval(ev.data.data);
+              sendBack({ type: 'eval.result', data: result, msgId: ev.data.msgId, sk })
+            } catch (e) {
+              sendBack({ type: 'eval.result', error: e, msgId: ev.data.msgId, sk })
+            }
+            break;
           }
           case 'store.code': {
-            window.___of_sandbox_values.push(eval(ev.data.data));
-            sendBack({ type: 'store.index', data: window.___of_sandbox_values.length - 1, msgId: ev.data.msgId, sk })
+            try {
+              const result = (new Function('___eval_code', 'return eval(___eval_code)'))(ev.data.data)//阻止代码访问___store
+              ___store.push(result);
+              sendBack({ type: 'store.index', data: ___store.length - 1, msgId: ev.data.msgId, sk })
+            } catch (e) {
+              sendBack({ type: 'store.index', error: e, msgId: ev.data.msgId, sk })
+            }
+            break;
           }
         }
       });
