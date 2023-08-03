@@ -1,6 +1,11 @@
 import sandboxHtml from './sandbox.html?raw';
 
 let sbId = 0;
+enum State {
+  Initing,
+  Ready,
+  Disposed
+}
 export class Sandbox {
   #msgId = 0;
   readonly #iframe: HTMLIFrameElement;
@@ -10,6 +15,9 @@ export class Sandbox {
   readonly #evalWaitlist: Map<number, [(value: any) => void, (reason: any) => void]> = new Map();
   #sk?: string;
   readonly id: number = sbId++;
+  state: State = State.Initing;
+
+  private __onmessage = (...args: [MessageEvent]) => this.#acceptMessage(...args);
   constructor() {
     this.#mk = (10000000 + Math.floor(Math.random() * 89999999)).toString();
     this.#iframe = document.createElement('iframe');
@@ -19,7 +27,7 @@ export class Sandbox {
     document.body.appendChild(this.#iframe);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.#source = this.#iframe.contentWindow!;
-    window.addEventListener('message', (...args) => this.#acceptMessage(...args));
+    window.addEventListener('message', this.__onmessage);
   }
 
   init(): Promise<void> {
@@ -54,6 +62,7 @@ export class Sandbox {
       if (ev.data?.type === 'init.ok') {
         this.#sk = ev.data.sk;
         this.#iframe.contentWindow?.postMessage({ type: 'init.ok', mk: this.#mk }, '*');
+        this.state = State.Ready;
         this.#initWaitlist.forEach(v => v());
       }
     }
@@ -85,8 +94,10 @@ export class Sandbox {
     }
   }
 
+  /**销毁此沙箱。销毁的实例不能再次初始化。 */
   dispose() {
+    this.state = State.Disposed;
     this.#iframe.remove();
-    window.removeEventListener('message', this.#acceptMessage);
+    window.removeEventListener('message', this.__onmessage);
   }
 }
