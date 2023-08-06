@@ -26,4 +26,4 @@ declare global {
 }
 
 export type AnyRecord = Record<string | number | symbol, any>;
-export type StringRecord = Record<string, any>;
+export type StringRecord<V = any> = Record<string, V>;

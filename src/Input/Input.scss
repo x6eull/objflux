@@ -2,13 +2,15 @@
     padding: .4rem 2.4rem;
     overflow: hidden;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
 
     &:not(:first-child) {
         border-top: 1px solid #e5e5e5;
     }
 
     .text {
+        flex: 1 0 auto;
+        min-height: 1.5em;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -17,6 +19,7 @@
         user-select: none;
 
         .title {
+            line-height: 1.5em;
             font-size: .9rem;
         }
 
@@ -27,18 +30,18 @@
     }
 
     .textarea {
+        width: 100%;
+        line-height: 1.5em;
         height: 1.8em;
         font-weight: lighter;
-        font-size: medium;
         outline: none;
-        border: none;
-        border-color: #ccc;
-        border-bottom-width: 1.5px;
+        border: 1.5px none #ccc;
         border-bottom-style: solid;
-        min-width: 0;
-        flex: 1;
+        flex: 1 1 auto;
         transition: border-color ease 0.1s, background-color ease 0.1s;
-        padding: 5px 10px;
+        resize: none;
+        padding: .15em .3em;
+        font-family: inherit;
 
         &:focus {
             border-color: #00b8ff;
@@ -91,26 +94,9 @@
                 display: block;
             }
         }
-
-        .textarea {
-            width: 100%;
-        }
-
-        textarea.textarea {
-            margin-top: 8px;
-        }
     }
 
-    &.multiline-input {
-        align-items: start;
-
-        textarea.textarea {
-            height: unset;
-            line-height: 1.5em;
-            resize: none;
-            font-family: unset;
-            border-width: 1.5px;
-            border-style: solid;
-        }
+    &.multiline-input .textarea {
+        border-style: solid;
     }
 }

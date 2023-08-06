@@ -7,8 +7,8 @@ import { FolderLevelContext } from '../Folder/FolderLevelContext';
  * 此控件可以受控（指定`value`则受控）
  */
 export function Input(
-    { title, desc, initialValue, value, onChange, allowMultiline, placeholder, error, seperateTitleWithInput, seperateTitleWithDescription, minViewLines, maxViewLines }:
-        { title: string, desc?: string, initialValue?: string, value?: string, onChange?: (value: string) => void, allowMultiline?: boolean, placeholder?: string, error?: boolean, seperateTitleWithInput?: boolean, seperateTitleWithDescription?: boolean, minViewLines?: number, maxViewLines?: number }
+    { title, desc, initialValue, value, onChange, allowMultiline, placeholder, error, seperateTitleWithInput, seperateTitleWithDescription, minViewLines, maxViewLines, ...others }:
+        { title: string, desc?: string, initialValue?: string, value?: string, onChange?: (value: string) => void, allowMultiline?: boolean, placeholder?: string, error?: boolean, seperateTitleWithInput?: boolean, seperateTitleWithDescription?: boolean, minViewLines?: number, maxViewLines?: number } & React.TextareaHTMLAttributes<HTMLTextAreaElement>
 ) {
     allowMultiline ??= false;
     seperateTitleWithInput ??= false;
@@ -27,12 +27,10 @@ export function Input(
             <div className='title'>{title}</div>
             {desc ? (<div className='desc'>{desc}</div>) : (<></>)}
         </div>
-        {allowMultiline ? (<textarea placeholder={placeholder} className={'textarea' + (error ? ' error' : '')} onChange={e => {
-            const _result = e.target.value;
-            //_result = allowMultiline ? _result : _result.replace(/\n/g, '');
-
-            setStateValue(_result);
-            onChange?.(_result);
+        <textarea {...others} placeholder={placeholder} className={'textarea' + (error ? ' error' : '')} onChange={e => {
+            const nValue = e.target.value;
+            setStateValue(nValue);
+            onChange?.(nValue);
         }} style={{
             height: `${(Math.max(
                 Math.min(
@@ -42,12 +40,6 @@ export function Input(
                 minViewLines
             )) * 1.5}em`
         }} value={value}>
-        </textarea>) : (<input placeholder={placeholder} className={'textarea' + (error ? ' error' : '')} value={value} onChange={e => {
-            const _result = e.target.value;
-            // _result = allowMultiline ? _result : _result.replace(/\n/g, '');
-
-            setStateValue(_result);
-            onChange?.(_result ?? '');
-        }} />)}
+        </textarea>
     </div>;
 }

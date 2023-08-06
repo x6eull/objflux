@@ -37,7 +37,7 @@
     box-sizing: border-box;
     width: $size;
     height: $size;
-    flex: 0 0; //防止文字太多时标识变形
+    flex: 0 0 auto; //防止文字太多时标识变形
     border: 2px solid #b3b3b3;
     border-radius: 4px;
     margin-right: .6rem;

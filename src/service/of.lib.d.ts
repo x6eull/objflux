@@ -5,6 +5,7 @@ declare type StringRestriction = {
   maxLength?: number;
   minLength?: number;
   validate?: string;
+  multiLine?: boolean;
 };
 declare type OfString<_T extends StringRestriction> = string;
 
