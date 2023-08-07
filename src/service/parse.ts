@@ -1,83 +1,27 @@
-/* eslint-disable @typescript-eslint/no-empty-interface */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { StringRecord } from '../utils/utils';
 import { createSystem, createVirtualTypeScriptEnvironment } from '@typescript/vfs';
 import ts, { ScriptTarget } from 'typescript';
 
 import OfLib from './of.lib.d.ts?raw';
-
-/**表示可以追踪至用户的信息，未来可能加入uid等属性。 */
-export interface User {
-  username: string;
-}
-export interface Tool {
-  name: string;
-  input: Parameter[];
-  func: (...args: any[]) => any;
-  output: TypeBase | OutputType;
-}
-
-export interface Parameter {
-  /**源代码中参数名称，如直接解构则无 */
-  devName?: string;
-  /**UI中参数名称 */
-  displayName: string;
-
-  type: ValidInputType;
-}
-
-export type ValidInputType = SimpleArrayType | OptionalType | ObjectType | StringType | NumberType | BooleanType;
-
-interface TypeBase<K extends string = string, R extends StringRecord = StringRecord> {
-  keyword: K;
-  restriction: R;
-}
-
-export interface SimpleArrayType<T extends ValidInputType = ValidInputType> extends TypeBase<'array'> {
-  base: T;
-}
-/**可选类型，包装另一个类型，注意`restriction`等属性仍需在`base`中获取。 */
-export interface OptionalType<T extends ValidInputType = ValidInputType> extends TypeBase<'optional'> {
-  base: T;
-}
-/**将类型转换为其可选变体，如果类型已经可选则throw。 */
-function toOptional<T extends ValidInputType>(type: T): OptionalType<T> {
-  if (type.keyword === 'optional')
-    throw new Error('无法重复设置类型的可选性');
-  return { keyword: 'optional', base: type, restriction: {} };
-}
-
-export interface ObjectType extends TypeBase<'object', StringRecord<never>> {
-  members: StringRecord<ValidInputType>;
-}
-export interface StringType extends TypeBase<'string', StringRestriction> { }
-export interface NumberType extends TypeBase<'number', NumberRestriction> { }
-export interface BooleanType extends TypeBase<'boolean', StringRecord<never>> { }
-
-export interface OutputType<K extends string = string> {
-  outKeyword: K;
-}
-
-export interface ReactElementOuput extends OutputType<'ui.react.element'> { }
-
+import { ObjectType, InputType, Parameter, toOptional } from './type';
+import { StringRecord } from '../utils/utils';
 /**撤销ts将"\等进行转义 */
 function parseEscapedText(eText: string) { return JSON.parse(`"${eText}"`) }
 
-export function parseParameter(node: ts.ParameterDeclaration, index?: number): Parameter {
+export function parseParameter(node: ts.ParameterDeclaration, index = -1): Parameter {
   let devName: string;
   if (ts.isIdentifier(node.name))
     devName = node.name.getText();
   else if (ts.isObjectBindingPattern(node.name))
-    devName = `__objectPara${index ?? ''}`;
-  else throw new Error(`无法解析参数${index ?? ''}`);
+    devName = `__objectPara${index}`;
+  else throw new Error(`无法解析参数${index}`);
   if (!node.type) throw new Error(`未找到${devName}的类型参数`);
   if (node.dotDotDotToken) throw new Error(`无法解析剩余参数${devName}`);
   const type = parseType(node.type, !!node.questionToken);
   return { devName, displayName: devName, type };
 }
 
-export function parseType(node: ts.TypeNode, optional = false): ValidInputType {
-  let result: ValidInputType;
+export function parseType(node: ts.TypeNode, optional = false): InputType {
+  let result: InputType;
   switch (node.kind) {
     case ts.SyntaxKind.StringKeyword:
       result = { keyword: 'string', restriction: {} };
@@ -128,7 +72,7 @@ export function parseType(node: ts.TypeNode, optional = false): ValidInputType {
 }
 
 export function parseTypeLiteralAsObjectType(node: ts.TypeLiteralNode): ObjectType {
-  const members: { [name: string]: ValidInputType } = {};
+  const members: { [name: string]: InputType } = {};
   node.members.forEach((m, i) => {
     if (ts.isPropertySignature(m)) {
       let mtext: string;
@@ -176,7 +120,7 @@ export function parseTypeLiteralAsRestriction(node: ts.TypeLiteralNode): StringR
   return result;
 }
 
-export async function parseCode(code: string) {
+export function parseCode(code: string) {
   const fsMap = new Map<string, string>();
   fsMap.set('of.lib.d.ts', OfLib);
   const system = createSystem(fsMap);

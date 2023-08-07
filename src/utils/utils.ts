@@ -27,3 +27,4 @@ declare global {
 
 export type AnyRecord = Record<string | number | symbol, any>;
 export type StringRecord<V = any> = Record<string, V>;
+export type RecordNever<K extends string | number | symbol = string> = Record<K, never>;
