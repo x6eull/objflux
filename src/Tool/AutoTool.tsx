@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
 import { Input } from '../Input/Input';
-import { Parameter, Tool, ValidInputType } from '../service/Tool';
+import { Parameter, Tool, InputType } from '../service/type';
 import { StringRecord } from '../utils/utils';
 import './AutoTool.scss';
 
-function getDefaultValue(type: ValidInputType) {
+function getDefaultValue(type: InputType) {
   if (type.keyword === 'optional')
     type = type.base;
   switch (type.keyword) {
@@ -15,7 +15,10 @@ function getDefaultValue(type: ValidInputType) {
     case 'object': {
       const v: StringRecord = {};
       for (const [mn, mt] of Object.entries(type.members))
-        v[mn] = getDefaultValue(mt);
+        if ('default' in mt)
+          v[mn] = mt.default;
+        else
+          v[mn] = getDefaultValue(mt);
       return v;
     }
     default:
@@ -24,15 +27,32 @@ function getDefaultValue(type: ValidInputType) {
 }
 
 export function AutoTool({ tool }: { tool: Tool }) {
-  const { input } = tool;
+  let { input, func, output } = tool;
   const def = useMemo(() => input.map((i) => getDefaultValue(i.type)), [input]);
   const [values, setValues] = useState(def);
-  return (<form autoCapitalize='none' autoComplete='off' spellCheck={false} className='autotool'>
-    {input.map((p, i) => <AutoPara onChange={(nV) => {
-      values[i] = nV;
-      setValues([...values]);
-    }} value={values[i]} key={p.displayName} para={p} />)}
-  </form>);
+  let outputToRender;
+  switch (output.keyword) {
+    case 'optional':
+      //TODO 处理可选输出
+      output = output.base;
+    // falls through
+    case 'ui.react.element':
+      outputToRender = func(...values);
+      break;
+    default:
+      throw new Error('暂不支持此输出类型');
+  }
+  return (<div className='autotool'>
+    <form autoCapitalize='none' autoComplete='off' spellCheck={false} className='form'>
+      {input.map((p, i) => <AutoPara onChange={(nV) => {
+        values[i] = nV;
+        setValues([...values]);
+      }} value={values[i]} key={p.displayName} para={p} />)}
+    </form>
+    <div className='result'>
+      {outputToRender}
+    </div>
+  </div>);
 }
 
 function AutoPara({ para, value, onChange }: { para: Parameter, value: any, onChange: (v: any) => void }) {

@@ -6,8 +6,8 @@ import { register as officlaRegister } from './official';
 load(officlaRegister);
 export const toolRoute: RouteObject =
 {
-  path: 'tools',
-  errorElement: <ToolsError />,
+  path: 'tool',
+  errorElement: <ToolError />,
   element: <Outlet />,
   children: [
     {
@@ -31,7 +31,7 @@ export const toolRoute: RouteObject =
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
-function ToolsError() {
+function ToolError() {
   const errMsg = (useRouteError() as Error | undefined)?.message ?? '未知错误';
   return (<div>载入子模块时出错: {errMsg}</div>);
 }

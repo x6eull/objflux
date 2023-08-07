@@ -1,4 +1,4 @@
-import { Tool, User } from '../service/Tool';
+import { Tool, User } from '../service/type';
 import './ToolViewer.scss';
 import { useLoaderData } from 'react-router-dom';
 import { AutoTool } from './AutoTool';
