@@ -36,19 +36,19 @@ export function AutoTool({ tool }: { tool: Tool }) {
       //TODO 处理可选输出
       output = output.base;
     // falls through
-    case 'ui.react.element':
+    case 'react.element':
       outputToRender = func(...values);
       break;
     default:
       throw new Error('暂不支持此输出类型');
   }
   return (<div className='autotool'>
-    <form autoCapitalize='none' autoComplete='off' spellCheck={false} className='form'>
+    <div className='form'>
       {input.map((p, i) => <AutoPara onChange={(nV) => {
         values[i] = nV;
         setValues([...values]);
-      }} value={values[i]} key={p.displayName} para={p} />)}
-    </form>
+      }} value={values[i]} key={p.devName ?? p.displayName} para={p} />)}
+    </div>
     <div className='result'>
       {outputToRender}
     </div>
@@ -65,7 +65,25 @@ function AutoPara({ para, value, onChange }: { para: Parameter, value: any, onCh
   //TODO 处理其他类型的输入
   switch (type.keyword) {
     case 'string': {
-      return (<Input allowMultiline={type.restriction.multiLine} onChange={onChange} value={String(value)} title={displayName} required={required} />);
+      let ml = false, vl: number | undefined = undefined;
+      const rMl = type.restriction.multiLine;
+      switch (typeof rMl) {
+        case 'undefined':
+          break;
+        case 'boolean':
+          if (rMl) {
+            ml = true;
+            vl = 3;
+          }
+          break;
+        case 'number':
+          ml = true;
+          vl = rMl;
+          break;
+        default:
+          throw new Error('无效的multiLine约束');
+      }
+      return (<Input allowMultiline={ml as any} viewLines={vl as any} onChange={onChange} value={String(value)} title={displayName} required={required} />);
     }
     default:
       throw new Error('暂不支持此输入类型');

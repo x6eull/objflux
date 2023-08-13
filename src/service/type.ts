@@ -51,4 +51,4 @@ export interface StringType extends TypeBase<'string', StringRestriction> { }
 export interface NumberType extends TypeBase<'number', NumberRestriction> { }
 export interface BooleanType extends TypeBase<'boolean', RecordNever> { }
 
-export interface ReactElementType extends TypeBase<'ui.react.element', RecordNever> { }
+export interface ReactElementType extends TypeBase<'react.element', RecordNever> { }

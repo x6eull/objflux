@@ -9,10 +9,10 @@ export const register: Register = {
       name: 'playground',
       input: [{
         displayName: '源代码',
-        type: { keyword: 'string', restriction: { multiLine: false } } as StringType
+        type: { keyword: 'string', restriction: { multiLine: 8 } } as StringType
       }],
       func: (source: string) => <Playground source={source} />,
-      output: { keyword: 'ui.react.element', restriction: {} }
+      output: { keyword: 'react.element', restriction: {} }
     }
   ]
 };

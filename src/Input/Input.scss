@@ -2,7 +2,7 @@
     padding: .4rem 2.4rem;
     overflow: hidden;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
 
     &:not(:first-child) {
         border-top: 1px solid #e5e5e5;
@@ -10,7 +10,6 @@
 
     .text {
         flex: 1 0 auto;
-        min-height: 1.5em;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -20,7 +19,7 @@
 
         .title {
             line-height: 1.5em;
-            font-size: .9rem;
+            font-size: .9em;
         }
 
         .desc {
@@ -29,16 +28,24 @@
         }
     }
 
-    .textarea {
+    .inputele {
+        &:placeholder-shown {
+            word-wrap: normal;
+            overflow: hidden;
+        }
+
+        overflow: hidden auto;
         width: 100%;
+        box-sizing: border-box;
         line-height: 1.5em;
-        height: 1.8em;
-        font-weight: lighter;
+        font-weight: normal;
         outline: none;
         border: 1.5px none #ccc;
         border-bottom-style: solid;
         flex: 1 1 auto;
-        transition: border-color ease 0.1s, background-color ease 0.1s;
+        align-self: center;
+        transition: border-color ease 0.15s,
+        background-color ease 0.15s;
         resize: none;
         padding: .15em .3em;
         font-family: inherit;
@@ -77,8 +84,12 @@
     }
 
     &.seperated-input {
-        align-items: unset;
-        display: block;
+        flex-direction: column;
+        align-items: flex-start;
+
+        .inputele {
+            align-self: unset;
+        }
 
         .text {
             margin-right: unset;
@@ -96,7 +107,11 @@
         }
     }
 
-    &.multiline-input .textarea {
-        border-style: solid;
+    &.multiline {
+        align-items: flex-start;
+
+        .inputele {
+            border-style: solid;
+        }
     }
 }
