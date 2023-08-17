@@ -1,3 +1,4 @@
+import { StringRecord } from '../utils/utils';
 import sandboxHtml from './sandbox.html?raw';
 
 let sbId = 0;
@@ -12,7 +13,7 @@ export class Sandbox {
   readonly #source: Window;
   readonly #mk: string;
   readonly #initWaitlist: (() => void)[] = [];
-  readonly #evalWaitlist: Map<number, [(value: any) => void, (reason: any) => void]> = new Map();
+  readonly #evalWaitlist: Map<number, [(evalResult: { result: any, storeIndex?: number }) => void, (reason: any) => void]> = new Map();
   #sk?: string;
   readonly id: number = sbId++;
   state: State = State.Initing;
@@ -35,23 +36,25 @@ export class Sandbox {
     return new Promise((rs) => this.#initWaitlist.push(rs));
   }
 
-  eval(code: string): Promise<any> {
+  /**用第一个参数定义一个函数，然后展开第二个参数调用新定义的函数。新函数使用`args`接收参数。 */
+  eval(evalData: { body: string, args?: any[], withStore?: number | false, doStore?: boolean, doAwait?: boolean, doReturn?: boolean, doReturnError?: boolean }): Promise<{ result: any, storeIndex?: number }> {
+    evalData.args ??= [];
+    evalData.withStore ??= false;
+    evalData.doStore ??= false;
+    evalData.doAwait ??= false;
+    evalData.doReturn ??= true;
+    evalData.doReturnError ??= true;
     return new Promise((rs, rj) => {
-      const i = this.#send(code, 'eval.code');
-      this.#evalWaitlist.set(i, [rs, rj]);
+      this.init().then(() => {
+        const i = this.#send({ evalData: { ...evalData, doMessage: true }, type: 'eval.request' });
+        this.#evalWaitlist.set(i, [rs, rj]);
+      });
     });
   }
 
-  /**运行指定代码，并且将结果保存在沙箱内 */
-  store(code: string): Promise<number> {
-    return new Promise((rs, rj) => {
-      const i = this.#send(code, 'store.code');
-      this.#evalWaitlist.set(i, [rs, rj]);
-    });
-  }
-
-  #send(data: any, type: string): number {
-    this.#source.postMessage({ type, data, mk: this.#mk, msgId: this.#msgId }, '*');
+  #send(data: StringRecord): number {
+    const messageData = { ...data, mk: this.#mk, msgId: this.#msgId };
+    this.#source.postMessage(messageData, '*');
     return this.#msgId++;
   }
 
@@ -72,22 +75,11 @@ export class Sandbox {
       case 'eval.result': {
         const v = this.#evalWaitlist.get(ev.data.msgId);
         if (v) {
+          this.#evalWaitlist.delete(ev.data.msgId);
           if (ev.data.error)
             v[1](ev.data.error);
           else
-            v[0](ev.data.data);
-          this.#evalWaitlist.delete(ev.data.msgId);
-        }
-        break;
-      }
-      case 'store.index': {
-        const v = this.#evalWaitlist.get(ev.data.msgId);
-        if (v) {
-          if (ev.data.error)
-            v[1](ev.data.error);
-          else
-            v[0](ev.data.data);
-          this.#evalWaitlist.delete(ev.data.msgId);
+            v[0]({ result: ev.data.evalResult, storeIndex: ev.data.storeIndex });
         }
         break;
       }

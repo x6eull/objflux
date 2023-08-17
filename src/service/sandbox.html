@@ -3,15 +3,17 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="data:x-icon," />
 </head>
 
 <body>
   <script type="module">
-    "use strict";
+    window.globalEval = (code) => {
+      const sonce = '__eval_code_' + Math.random().toString().replace(/\./g, '_');
+      return (new Function(sonce, `return eval(${sonce})`))(code);
+    };
     (() => {
-      let ___store = [];
-      window.addEventListener('message', (ev) => {
+      const ___store = [];
+      window.addEventListener('message', async (ev) => {
         if (ev.source !== pt)
           return;
         if (typeof mk !== 'string') {
@@ -21,26 +23,25 @@
         }
         if (ev.data.mk !== mk)
           return;
-        switch (ev.data.type) {
-          case 'eval.code': {
-            try {
-              const result = eval(ev.data.data);
-              sendBack({ type: 'eval.result', data: result, msgId: ev.data.msgId, sk })
-            } catch (e) {
-              sendBack({ type: 'eval.result', error: e, msgId: ev.data.msgId, sk })
-            }
-            break;
-          }
-          case 'store.code': {
-            try {
-              const sonce = '__eval_code_' + Math.random().toString().replace(/\./g, '_');
-              const result = (new Function(sonce, `return eval(${sonce})`))(ev.data.data)//阻止代码访问___store
-              ___store.push(result);
-              sendBack({ type: 'store.index', data: ___store.length - 1, msgId: ev.data.msgId, sk })
-            } catch (e) {
-              sendBack({ type: 'store.index', error: e, msgId: ev.data.msgId, sk })
-            }
-            break;
+        if (ev.data.type !== 'eval.request')
+          return;
+        const { evalData } = ev.data;
+        if (evalData) {
+          const { doStore, doAwait, withStore, args, body, doReturn, doMessage, doReturnError } = evalData;
+          const useStore = typeof withStore === 'number';
+          try {
+            const f = new Function(`${useStore ? 'store,' : ''}...args`, body);
+            const fargs = useStore ? [___store[withStore], ...args] : [...args];
+            let r = f(...fargs);
+            if (doAwait)
+              r = await r;
+            if (doStore)
+              ___store.push(r);
+            if (doMessage)
+              sendBack({ type: 'eval.result', storeIndex: doStore ? ___store.length - 1 : null, evalResult: doReturn ? r : null, msgId: ev.data.msgId, sk })
+          } catch (er) {
+            if (doMessage)
+              sendBack({ type: 'eval.result', error: doReturnError ? er : true, msgId: ev.data.msgId, sk });
           }
         }
       });

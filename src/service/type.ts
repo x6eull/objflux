@@ -6,11 +6,23 @@ import { RecordNever, StringRecord } from '../utils/utils';
 export interface User {
   username: string;
 }
+
 export interface Tool {
   name: string;
   input: Parameter[];
-  func: (...args: any[]) => any;
+  func: (...args: any[]) => any | Promise<any>;
   output: InputType | OutputType;
+  config: ToolConfig;
+}
+
+export interface ToolConfig {
+  /**指定是否为纯函数，即对于同样的输入永远给出同样的输出。 
+   * 对于纯函数，输入未发生改变时会跳过计算。*/
+  pure?: boolean;
+  /**在输入保持不变指定时间后再计算。 */
+  calcDelay?: number;
+  /**每间隔一段时间计算。 */
+  calcInterval?: number;
 }
 
 export interface Parameter {

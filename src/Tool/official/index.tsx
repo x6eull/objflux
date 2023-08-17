@@ -9,10 +9,11 @@ export const register: Register = {
       name: 'playground',
       input: [{
         displayName: '源代码',
-        type: { keyword: 'string', restriction: { multiLine: 8 } } as StringType
+        type: { keyword: 'string', restriction: { multiLine: 8 }, default: 'export function myFunc(x:string,y:string){return `${x.length} ${y}`;}' } as StringType,
       }],
       func: (source: string) => <Playground source={source} />,
-      output: { keyword: 'react.element', restriction: {} }
+      output: { keyword: 'react.element', restriction: {} },
+      config: { calcDelay: 300, pure: true }
     }
   ]
 };
