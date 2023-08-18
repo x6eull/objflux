@@ -80,7 +80,7 @@ Object.defineProperties(Promise.prototype, {
     enumerable: false,
     configurable: true,
     value(): { promise: Promise<unknown>, revoke(result?: unknown): void } {
-      let rProRs: (result?: unknown) => void = undefined as unknown as (result?: unknown) => void;
+      let rProRs: (result?: unknown) => void = undefined as any;
       const revokePromise = new Promise(rs => rProRs = rs);
       return {
         promise: Promise.race([this, revokePromise]),

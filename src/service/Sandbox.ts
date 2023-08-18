@@ -13,15 +13,15 @@ enum State {
 export class Sandbox {
   #msgId = 0;
   readonly #worker: Worker;
-  readonly #key: string;
+  readonly #key: number;
   #initWaitlist: (() => void)[] = [];
   readonly #evalWaitlist: Map<number, [(evalResult: { result: any, storeIndex?: number }) => void, (reason: any) => void]> = new Map();
   state: State = State.Initing;
 
   private __onmessage = (...args: [MessageEvent]) => this.#acceptMessage(...args);
   constructor() {
-    this.#key = (10000000 + Math.floor(Math.random() * 89999999)).toString();
-    this.#worker = new Worker(toDataURL(`let __key='${this.#key}';${sandboxWorkerScript}`));
+    this.#key = 10000000 + Math.floor(Math.random() * 89999999);
+    this.#worker = new Worker(toDataURL(`let __key=${this.#key};${sandboxWorkerScript}`));
     this.#worker.addEventListener('message', this.__onmessage);
   }
 

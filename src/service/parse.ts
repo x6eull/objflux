@@ -1,9 +1,10 @@
 import { createSystem, createVirtualTypeScriptEnvironment } from '@typescript/vfs';
-import ts, { ScriptTarget } from 'typescript';
+import ts from 'typescript';
 
 import OfLib from './of.lib.d.ts?raw';
 import { ObjectType, InputType, Parameter, toOptional } from './type';
 import { StringRecord } from '../utils/utils';
+
 /**撤销ts将"\等进行转义 */
 function parseEscapedText(eText: string) { return JSON.parse(`"${eText}"`) }
 
@@ -97,11 +98,15 @@ export function parseTypeLiteralAsRestriction(node: ts.TypeLiteralNode): StringR
       //TODO 支持类型引用?
       if (ts.isLiteralTypeNode(mtype)) {
         const lt = mtype.literal;
-        let value;
+        let value: string | number | boolean | bigint;
         if (ts.isStringLiteral(lt))
           value = parseEscapedText(lt.text);
         else if (ts.isNumericLiteral(lt))
           value = Number(lt.text);
+        else if (lt.kind === ts.SyntaxKind.TrueKeyword)
+          value = true;
+        else if (lt.kind === ts.SyntaxKind.FalseKeyword)
+          value = false;
         else if (ts.isBigIntLiteral(lt)) {
           const biText = lt.text;
           //去除末尾n
@@ -126,7 +131,7 @@ export function parseCode(code: string) {
   const system = createSystem(fsMap);
   let exportName: string | undefined;
   const exportParameters: Parameter[] = [];
-  const env = createVirtualTypeScriptEnvironment(system, [], ts, { target: ScriptTarget.ES2022, noLib: true, noEmitHelpers: true, noEmit: false },
+  const env = createVirtualTypeScriptEnvironment(system, [], ts, { target: ts.ScriptTarget.ES2022, noLib: true, noEmitHelpers: true, noEmit: false },
     {
       before: [(context) => (sf1) => <ts.SourceFile>ts.visitNode(sf1, sf => {
         return ts.visitEachChild(sf, (child) => {

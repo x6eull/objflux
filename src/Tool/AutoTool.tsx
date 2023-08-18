@@ -165,7 +165,7 @@ function AutoPara({ para, value, onChange }: { para: Parameter, value: any, onCh
         default:
           throw new Error('无效的multiLine约束');
       }
-      return (<Input allowMultiline={ml as any} viewLines={vl as any} onChange={onChange} value={String(value)} title={displayName} required={required} />);
+      return (<Input maxLength={type.restriction.maxLength} allowMultiline={ml as any} viewLines={vl as any} onChange={onChange} value={String(value)} title={displayName} required={required} />);
     }
     default:
       throw new Error('暂不支持此输入类型');

@@ -7,8 +7,8 @@ import { FolderLevelContext } from '../Folder/FolderLevelContext';
  * 此控件可以受控（指定`value`则受控）
  */
 export function Input(
-    { title, desc, initialValue, value, onChange, allowMultiline, placeholder, error, seperateTitleWithInput, seperateTitleWithDescription, viewLines, required }:
-        { title: string, desc?: string, initialValue?: string, value?: string, onChange?: (value: string) => void, placeholder?: string, error?: boolean, seperateTitleWithInput?: boolean, seperateTitleWithDescription?: boolean, required?: boolean } &
+    { title, desc, initialValue, value, onChange, allowMultiline, placeholder, error, seperateTitleWithInput, seperateTitleWithDescription, viewLines, required, maxLength }:
+        { title: string, desc?: string, initialValue?: string, value?: string, onChange?: (value: string) => void, placeholder?: string, error?: boolean, seperateTitleWithInput?: boolean, seperateTitleWithDescription?: boolean, required?: boolean, maxLength?: number } &
         ({ allowMultiline?: false, viewLines?: never } |
         { allowMultiline: true, viewLines?: number })
 ) {
@@ -31,7 +31,8 @@ export function Input(
         required,
         spellCheck: 'false',
         autoComplete: 'off',
-        autoCapitalize: 'none'
+        autoCapitalize: 'none',
+        maxLength
     };
     return <div style={{ paddingLeft: `${(level + 1) * 1.2}rem` }} className={'input' + (allowMultiline ? ' multiline' : '') + (seperateTitleWithInput ? ' seperated-input' : '')}>
         <div className={'text' + (seperateTitleWithDescription ? ' seperated-text' : '')}>
