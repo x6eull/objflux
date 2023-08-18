@@ -14,7 +14,7 @@ export function parseParameter(node: ts.ParameterDeclaration, index = -1): Param
   else if (ts.isObjectBindingPattern(node.name))
     devName = `__objectPara${index}`;
   else throw new Error(`无法解析参数${index}`);
-  if (!node.type) throw new Error(`未找到${devName}的类型参数`);
+  if (!node.type) throw new Error(`未找到${devName || ' 未知参数 '}的类型参数`);
   if (node.dotDotDotToken) throw new Error(`无法解析剩余参数${devName}`);
   const type = parseType(node.type, !!node.questionToken);
   return { devName, displayName: devName, type };

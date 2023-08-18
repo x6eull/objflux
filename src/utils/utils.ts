@@ -59,3 +59,33 @@ export function switchString<R>(value: string, handler: { [on: string]: To<R, st
   }
   return defaultReturn as R;
 }
+
+declare global {
+  interface Promise<T> {
+    timeout(ms: number, label?: string): Promise<T>;
+    revocable(): { promise: Promise<T>, revoke(result?: T): void };
+  }
+}
+Object.defineProperties(Promise.prototype, {
+  timeout: {
+    writable: true,
+    enumerable: false,
+    configurable: true,
+    value(ms: number, label?: string): Promise<unknown> {
+      return Promise.race([this, new Promise((_, rj) => setTimeout((err: Error) => rj(err), ms, new Error(`Promise Timeout${label ? ` (${label})` : ''}`)))]);
+    }
+  },
+  revocable: {
+    writable: true,
+    enumerable: false,
+    configurable: true,
+    value(): { promise: Promise<unknown>, revoke(result?: unknown): void } {
+      let rProRs: (result?: unknown) => void = undefined as unknown as (result?: unknown) => void;
+      const revokePromise = new Promise(rs => rProRs = rs);
+      return {
+        promise: Promise.race([this, revokePromise]),
+        revoke: rProRs
+      };
+    }
+  }
+});
