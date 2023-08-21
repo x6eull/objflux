@@ -1,117 +1,118 @@
 .input {
-    padding: .4rem 2.4rem;
-    overflow: hidden;
+  padding: .4rem 2.4rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+
+  &:not(:first-child) {
+    border-top: 1px solid #e5e5e5;
+  }
+
+  &>.text {
+    flex: 1 0 auto;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    margin-right: .6rem;
+    -webkit-user-select: none;
+    user-select: none;
 
-    &:not(:first-child) {
-        border-top: 1px solid #e5e5e5;
+    &>.title {
+      line-height: 1.5em;
+      font-size: .9em;
     }
 
-    .text {
-        flex: 1 0 auto;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        margin-right: .6rem;
-        -webkit-user-select: none;
-        user-select: none;
+    &>.desc {
+      font-size: .7rem;
+      color: #5e5e5e;
+    }
+  }
 
-        .title {
-            line-height: 1.5em;
-            font-size: .9em;
-        }
-
-        .desc {
-            font-size: .7rem;
-            color: #5e5e5e;
-        }
+  &>.inputele {
+    &:placeholder-shown {
+      word-wrap: normal;
+      overflow: hidden;
+      text-overflow: ellipsis; //似乎无效
     }
 
-    .inputele {
-        &:placeholder-shown {
-            word-wrap: normal;
-            overflow: hidden;
-        }
+    overflow: hidden auto;
+    width: 100%;
+    box-sizing: border-box;
+    line-height: 1.5em;
+    font-weight: normal;
+    outline: none;
+    border: 1.5px none #ccc;
+    border-bottom-style: solid;
+    flex: 1 1 auto;
+    align-self: center;
+    transition: border-color ease 0.15s,
+    background-color ease 0.15s;
+    resize: none;
+    padding: .15em .3em;
+    font-family: inherit;
 
-        overflow: hidden auto;
-        width: 100%;
-        box-sizing: border-box;
-        line-height: 1.5em;
-        font-weight: normal;
-        outline: none;
-        border: 1.5px none #ccc;
-        border-bottom-style: solid;
-        flex: 1 1 auto;
-        align-self: center;
-        transition: border-color ease 0.15s,
-        background-color ease 0.15s;
-        resize: none;
-        padding: .15em .3em;
-        font-family: inherit;
+    &:focus {
+      border-color: #00b8ff;
+      background-color: #f5fcff;
+      color: #084679;
 
-        &:focus {
-            border-color: #00b8ff;
-            background-color: #f5fcff;
-            color: #084679;
+      &::placeholder {
+        color: #88d4f2;
+      }
+    }
 
-            &::placeholder {
-                color: #88d4f2;
-            }
-        }
+    &::placeholder {
+      color: #ccc;
+    }
+
+    &.error {
+      border-color: #e6575e;
+      color: #bd121a;
+
+      &:focus {
+        background-color: #fff7f7;
 
         &::placeholder {
-            color: #ccc;
+          color: #f28b90;
         }
+      }
 
-        &.error {
-            border-color: #e6575e;
-            color: #bd121a;
+      &::selection {
+        background-color: #ed5959;
+        color: white;
+      }
+    }
+  }
 
-            &:focus {
-                background-color: #fff7f7;
+  &.seperated-input {
+    flex-direction: column;
+    align-items: flex-start;
 
-                &::placeholder {
-                    color: #f28b90;
-                }
-            }
-
-            &::selection {
-                background-color: #ed5959;
-                color: white;
-            }
-        }
+    &>.inputele {
+      align-self: unset;
     }
 
-    &.seperated-input {
-        flex-direction: column;
-        align-items: flex-start;
+    &>.text {
+      margin-right: unset;
+      flex-direction: row;
+      align-items: baseline;
+      justify-content: start;
 
-        .inputele {
-            align-self: unset;
-        }
+      &>.title {
+        margin-right: .4em;
+      }
 
-        .text {
-            margin-right: unset;
-            flex-direction: row;
-            align-items: baseline;
-            justify-content: start;
-
-            .title {
-                margin-right: .4em;
-            }
-
-            &.seperated-text {
-                display: block;
-            }
-        }
+      &.seperated-text {
+        display: block;
+      }
     }
+  }
 
-    &.multiline {
-        align-items: flex-start;
+  &.multiline {
+    align-items: flex-start;
 
-        .inputele {
-            border-style: solid;
-        }
+    &>.inputele {
+      border-style: solid;
     }
+  }
 }

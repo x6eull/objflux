@@ -4,6 +4,10 @@
   box-shadow: 0 0 4px #1212121a;
   -webkit-user-select: none; // 兼容 Safari 浏览器
   user-select: none;
+  box-sizing: content-box;
+  height: 2rem;
+  contain: strict;
+  flex: 0 0 auto;
 
   @media (min-width:40rem) {
     padding: .6rem 3rem;
@@ -13,18 +17,20 @@
     padding: .6rem 7rem;
   }
 
-  .nav {
+  &>.nav {
+    contain: inherit;
     display: flex;
     flex-direction: row;
     align-items: center;
     width: 100%;
+    height: inherit;
 
     &>* {
-      height: 2rem;
+      height: inherit;
       line-height: 2rem;
     }
 
-    .logo {
+    &>.logo {
       display: block;
       color: #00b8ff;
       font-family: 'DengXian';
@@ -39,12 +45,13 @@
       }
     }
 
-    .sectors {
+    &>.sectors {
+      contain: inherit;
       flex-grow: 1;
       display: flex;
       flex-direction: row;
 
-      .sector-link {
+      &>.sector-link {
         display: block;
         padding: 0 min(1.2rem, 5%);
         border-radius: .25rem;
@@ -63,8 +70,5 @@
         }
       }
     }
-
-
   }
-
 }

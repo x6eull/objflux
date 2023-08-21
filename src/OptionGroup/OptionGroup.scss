@@ -8,7 +8,7 @@
   -webkit-user-select: none; // 兼容 Safari 浏览器
   user-select: none;
 
-  .option {
+  &>.option {
     &:not(:first-child) {
       border-top: 1px solid #e5e5e5;
     }
@@ -33,13 +33,13 @@
         background-color: #f7f7f7;
       }
 
-      .line-decoration {
+      &>.line-decoration {
         transition: height .15s ease-out;
         height: 1.1rem;
       }
     }
 
-    .line-decoration {
+    &>.line-decoration {
       display: inline-block;
       width: .2rem;
       height: 0;
@@ -52,16 +52,16 @@
       box-sizing: border-box;
     }
 
-    .text {
+    &>.text {
       display: flex;
       flex-direction: column;
       justify-content: center;
 
-      .title {
+      &>.title {
         font-size: .9rem;
       }
 
-      .desc {
+      &>.desc {
         color: #5e5e5e;
         font-size: .6rem;
       }

@@ -20,6 +20,7 @@
 
   &::after {
     content: ' ';
+    font-size: 0;
     color: transparent;
     display: block;
     position: absolute;
@@ -34,7 +35,7 @@
     z-index: 200;
   }
 
-  .control-card {
+  &>.control-card {
     display: flex;
     -webkit-user-select: none; // 兼容 Safari 浏览器
     user-select: none;
@@ -56,7 +57,7 @@
     &:active {
       background-color: #f5f5f5;
 
-      .title {
+      &>.title {
         color: #5d5d5d;
       }
     }
@@ -65,17 +66,17 @@
       border-bottom: 1px solid #e5e5e5;
     }
 
-    .text {
+    &>.text {
       display: flex;
       flex-direction: column;
       justify-content: center;
 
-      .title {
+      &>.title {
         font-size: $title-font-size;
         line-height: $title-font-size;
       }
 
-      .desc {
+      &>.desc {
         margin-top: $margin-for-desc;
         font-size: $desc-font-size;
         line-height: $desc-font-size;
@@ -83,7 +84,7 @@
       }
     }
 
-    .icon {
+    &>.icon {
       display: flex;
       width: 1rem;
       flex-direction: column;
@@ -96,7 +97,7 @@
     }
   }
 
-  .content-card {
+  &>.content-card {
     display: flex;
     flex-direction: column;
     height: 0;
