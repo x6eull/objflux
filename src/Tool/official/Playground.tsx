@@ -9,10 +9,9 @@ export function Playground({ source }: { source: string }) {
     const sandbox = new Sandbox();
     try {
       const { emitedText, exportName, para } = parseCode(source);
-      const defProRev = sandbox.eval({ body: 'const et = args[0],en = args[1];return import(`data:text/javascript,${encodeURIComponent(et)}`).then(m=>m[en]??m.default);', args: [emitedText, exportName], doStore: true, doAwait: true, doReturn: false }).timeout(1000, '定义计算函数').revocable();
       (async () => {
         try {
-          const res = await defProRev.promise;
+          const res = await sandbox.eval({ body: 'const et = args[0],en = args[1];return import(`data:text/javascript,${encodeURIComponent(et)}`).then(m=>m[en]??m.default);', args: [emitedText, exportName], doStore: true, doAwait: true, doReturn: false }).timeout(1000, '定义计算函数');
           if (typeof res !== 'object')
             return;
           const id = res.storeIndex;
@@ -31,10 +30,7 @@ export function Playground({ source }: { source: string }) {
           setResult(<>未通过javascript语法检查: {err?.message ?? '未知错误'}</>);
         }
       })();
-      return () => {
-        defProRev.revoke();
-        sandbox.dispose();
-      };
+      return () => sandbox.dispose();
     } catch (err: any) {
       sandbox.dispose();
       setResult(<>未通过typescript语法检查或存在不能识别的语法: {err?.message ?? '未知错误'}</>);

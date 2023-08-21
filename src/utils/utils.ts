@@ -60,32 +60,46 @@ export function switchString<R>(value: string, handler: { [on: string]: To<R, st
   return defaultReturn as R;
 }
 
+/**可在原`Promise`结束前`resolve`或`reject`的包装。 */
+interface ControlledPromise<T> extends Promise<T> {
+  resolve(reason: T): void;
+  reject(reason?: any): void;
+}
+
 declare global {
   interface Promise<T> {
     timeout(ms: number, label?: string): Promise<T>;
-    revocable(): { promise: Promise<T>, revoke(result?: T): void };
+    controlled(): ControlledPromise<T>;
   }
 }
-Object.defineProperties(Promise.prototype, {
-  timeout: {
-    writable: true,
-    enumerable: false,
-    configurable: true,
-    value(ms: number, label?: string): Promise<unknown> {
-      return Promise.race([this, new Promise((_, rj) => setTimeout((err: Error) => rj(err), ms, new Error(`Promise Timeout${label ? ` (${label})` : ''}`)))]);
-    }
+
+function defineProps<T extends object>(target: T, props: { [key: PropertyKey]: any }): T {
+  const desc: PropertyDescriptorMap = {};
+  for (const key of Reflect.ownKeys(props))
+    desc[key] = {
+      value: props[key],
+      configurable: true,
+      writable: true,
+      enumerable: false
+    };
+  return Object.defineProperties(target, desc);
+}
+
+defineProps(Promise.prototype, {
+  timeout(ms: number, label?: string): Promise<unknown> {
+    return Promise.race([this, new Promise((_, rj) => setTimeout((err: Error) => rj(err), ms, new Error(`Promise Timeout${label ? ` (${label})` : ''}`)))]);
   },
-  revocable: {
-    writable: true,
-    enumerable: false,
-    configurable: true,
-    value(): { promise: Promise<unknown>, revoke(result?: unknown): void } {
-      let rProRs: (result?: unknown) => void = undefined as any;
-      const revokePromise = new Promise(rs => rProRs = rs);
-      return {
-        promise: Promise.race([this, revokePromise]),
-        revoke: rProRs
-      };
-    }
+  controlled(): ControlledPromise<unknown> {
+    let conRs, conRj;
+    const conPromise = new Promise((rs, rj) => {
+      conRs = rs;
+      conRj = rj;
+    });
+    const race = Promise.race([this, conPromise]);
+    defineProps(race, {
+      resolve: conRs,
+      reject: conRj
+    });
+    return race as ControlledPromise<unknown>;
   }
 });

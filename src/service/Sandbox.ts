@@ -5,29 +5,34 @@ function toDataURL(js: string) {
   return `data:text/javascript,${encodeURIComponent(js)}`;
 }
 
+let sandboxId = 0;
 enum State {
   Initing,
   Ready,
   Disposed
 }
 export class Sandbox {
+  readonly id = sandboxId++;
   #msgId = 0;
-  readonly #worker: Worker;
+  #worker: Worker;
   readonly #key: number;
-  #initWaitlist: (() => void)[] = [];
-  readonly #evalWaitlist: Map<number, [(evalResult: { result: any, storeIndex?: number }) => void, (reason: any) => void]> = new Map();
+  #initWaitlist: [(() => void), (err: Error) => void][] = [];
+  #evalWaitlist: Map<number, [(evalResult: { result: any, storeIndex?: number }) => void, (reason: any) => void]> = new Map();
   state: State = State.Initing;
 
   private __onmessage = (...args: [MessageEvent]) => this.#acceptMessage(...args);
   constructor() {
     this.#key = 10000000 + Math.floor(Math.random() * 89999999);
-    this.#worker = new Worker(toDataURL(`let __key=${this.#key};${sandboxWorkerScript}`));
+    this.#worker = new Worker(toDataURL(sandboxWorkerScript), { credentials: 'omit', type: 'module', name: `sandbox_${this.id}` });
     this.#worker.addEventListener('message', this.__onmessage);
   }
 
   init(): Promise<void> {
-    if (this.state === State.Ready) return Promise.resolve();
-    return new Promise(rs => this.#initWaitlist.push(rs));
+    if (this.state === State.Ready)
+      return Promise.resolve();
+    if (this.state === State.Disposed)
+      return Promise.reject(new Error('沙箱实例已销毁'));
+    return new Promise((rs, rj) => this.#initWaitlist.push([rs, rj]));
   }
 
   /**在沙箱的全局作用域定义一个函数并调用。新函数使用`args`接收参数。 */
@@ -42,7 +47,7 @@ export class Sandbox {
       this.init().then(() => {
         const i = this.#send({ evalData: { ...evalData, doMessage: true }, type: 'eval.request' });
         this.#evalWaitlist.set(i, [rs, rj]);
-      });
+      }).catch(rj);
     });
   }
 
@@ -53,15 +58,22 @@ export class Sandbox {
   }
 
   #acceptMessage(ev: MessageEvent) {
-    if (ev.data?.key !== this.#key)
-      return;
     switch (ev.data?.type) {
-      case 'init.ok':
+      case 'init.listening':
+        if (this.state !== State.Initing)
+          break;
+        this.#worker.postMessage({ type: 'init.key', key: this.#key });
+        break;
+      case 'init.ready':
+        if (ev.data?.key !== this.#key)
+          break;
         this.state = State.Ready;
-        this.#initWaitlist.forEach(cb => cb());
-        this.#initWaitlist = [];
+        this.#initWaitlist.forEach(([cb]) => cb());
+        this.#initWaitlist = undefined as any;
         break;
       case 'eval.result': {
+        if (ev.data?.key !== this.#key)
+          break;
         const v = this.#evalWaitlist.get(ev.data.msgId);
         if (v) {
           this.#evalWaitlist.delete(ev.data.msgId);
@@ -77,8 +89,13 @@ export class Sandbox {
 
   /**销毁此沙箱。销毁的实例不能再次初始化。 */
   dispose() {
+    this.#worker?.removeEventListener('message', this.__onmessage);
     this.state = State.Disposed;
-    this.#worker.removeEventListener('message', this.__onmessage);
-    this.#worker.terminate();
+    this.#worker?.terminate();
+    this.#worker = undefined as any;
+    this.#initWaitlist?.forEach(([, rj]) => rj(new Error('沙箱实例已销毁')));
+    this.#initWaitlist = undefined as any;
+    this.#evalWaitlist?.forEach(([, rj]) => rj(new Error('沙箱实例已销毁')));
+    this.#evalWaitlist = undefined as any;
   }
 }
