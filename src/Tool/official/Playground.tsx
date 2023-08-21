@@ -20,7 +20,7 @@ export function Playground({ source }: { source: string }) {
             name: '__dev_playground_tool',
             input: para,
             config: {},
-            output: { keyword: 'react.element', restriction: {} },
+            output: { keyword: 'react.element' },
             async func(...values) {
               const output = await sandbox.eval({ withStore: id, body: 'return store(...args)', doReturn: true, doStore: false, doAwait: false, args: values }).timeout(100, '调用计算函数');
               return (<>{JSON.stringify(output.result)}</>);

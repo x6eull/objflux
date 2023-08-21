@@ -38,7 +38,7 @@ export type InputType = SimpleArrayType | OptionalType | ObjectType | StringType
 export type OutputType = ReactElementType;
 interface TypeBase<K extends string = string, R extends StringRecord = StringRecord> {
   keyword: K;
-  restriction: R;
+  restriction?: R;
   default?: NonNullable<unknown>;
 }
 
@@ -53,7 +53,7 @@ export interface OptionalType<T extends InputType = InputType> extends TypeBase<
 export function toOptional<T extends InputType>(type: T): OptionalType<T> {
   if (type.keyword === 'optional')
     throw new Error('无法重复设置类型的可选性');
-  return { keyword: 'optional', base: type, restriction: {} };
+  return { keyword: 'optional', base: type };
 }
 
 export interface ObjectType extends TypeBase<'object', RecordNever> {

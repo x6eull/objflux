@@ -147,8 +147,8 @@ function AutoPara({ para, value, onChange }: { para: Parameter, value: any, onCh
   //TODO 处理其他类型的输入
   switch (type.keyword) {
     case 'string': {
-      let ml = false, vl: number | undefined = undefined;
-      const rMl = type.restriction.multiLine;
+      let ml = false, vl = 0;
+      const rMl = type.restriction?.multiLine;
       switch (typeof rMl) {
         case 'undefined':
           break;
@@ -165,7 +165,7 @@ function AutoPara({ para, value, onChange }: { para: Parameter, value: any, onCh
         default:
           throw new Error('无效的multiLine约束');
       }
-      return (<Input maxLength={type.restriction.maxLength} allowMultiline={ml as any} viewLines={vl as any} onChange={onChange} value={String(value)} title={displayName} required={required} />);
+      return (<Input maxLength={type.restriction?.maxLength} allowMultiline={ml as any} viewLines={vl as any} onChange={onChange} value={String(value)} title={displayName} required={required} />);
     }
     default:
       throw new Error('暂不支持此输入类型');

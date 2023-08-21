@@ -25,13 +25,13 @@ export function parseType(node: ts.TypeNode, optional = false): InputType {
   let result: InputType;
   switch (node.kind) {
     case ts.SyntaxKind.StringKeyword:
-      result = { keyword: 'string', restriction: {} };
+      result = { keyword: 'string' };
       break;
     case ts.SyntaxKind.NumberKeyword:
-      result = { keyword: 'number', restriction: {} };
+      result = { keyword: 'number' };
       break;
     case ts.SyntaxKind.BooleanKeyword:
-      result = { keyword: 'boolean', restriction: {} };
+      result = { keyword: 'boolean' };
       break;
     case ts.SyntaxKind.TypeReference: {
       const n = node as ts.TypeReferenceNode;
@@ -85,7 +85,7 @@ export function parseTypeLiteralAsObjectType(node: ts.TypeLiteralNode): ObjectTy
       members[mtext] = parseType(m.type, !!m.questionToken);
     } else throw new Error(`成员${i}无效`);
   });
-  return { keyword: 'object', members, restriction: {} };
+  return { keyword: 'object', members };
 }
 
 export function parseTypeLiteralAsRestriction(node: ts.TypeLiteralNode): StringRecord {
