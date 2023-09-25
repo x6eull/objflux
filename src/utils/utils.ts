@@ -60,20 +60,7 @@ export function switchString<R>(value: string, handler: { [on: string]: To<R, st
   return defaultReturn as R;
 }
 
-/**可在原`Promise`结束前`resolve`或`reject`的包装。 */
-interface ControlledPromise<T> extends Promise<T> {
-  resolve(reason: T): void;
-  reject(reason?: any): void;
-}
-
-declare global {
-  interface Promise<T> {
-    timeout(ms: number, label?: string): Promise<T>;
-    controlled(): ControlledPromise<T>;
-  }
-}
-
-function defineProps<T extends object>(target: T, props: { [key: PropertyKey]: any }): T {
+function defineProps<T extends object>(target: T, props: { [key: PropertyKey]: any } & ThisType<T>): T {
   const desc: PropertyDescriptorMap = {};
   for (const key of Reflect.ownKeys(props))
     desc[key] = {
@@ -85,6 +72,17 @@ function defineProps<T extends object>(target: T, props: { [key: PropertyKey]: a
   return Object.defineProperties(target, desc);
 }
 
+declare global {
+  interface Promise<T> {
+    timeout(ms: number, label?: string): Promise<T>;
+    controlled(): ControlledPromise<T>;
+  }
+}
+/**可在原`Promise`结束前`resolve`或`reject`的包装。 */
+interface ControlledPromise<T> extends Promise<T> {
+  resolve(reason: T): void;
+  reject(reason?: any): void;
+}
 defineProps(Promise.prototype, {
   timeout(ms: number, label?: string): Promise<unknown> {
     return Promise.race([this, new Promise((_, rj) => setTimeout((err: Error) => rj(err), ms, new Error(`Promise Timeout${label ? ` (${label})` : ''}`)))]);
@@ -103,3 +101,33 @@ defineProps(Promise.prototype, {
     return race as ControlledPromise<unknown>;
   }
 });
+
+export function combine(...funcs: (((...args: any[]) => any) | undefined)[]): (...args: any[]) => any {
+  const fs: ((...args: any[]) => any)[] = funcs.filter(f => f instanceof Function) as any;
+  return (...args) => {
+    let rv;
+    for (const f of fs)
+      rv = f(...args);
+    return rv;
+  };
+}
+
+export function scopedVar<T>(init: T): { get(): T, set(v: T): void } {
+  return (() => {
+    let __var = init;
+    return {
+      get() { return __var },
+      set(v: T) { __var = v }
+    };
+  })();
+}
+
+export function limit(input: number, min?: number, max?: number) {
+  if (typeof min === 'number')
+    if (input < min)
+      input = min;
+  if (typeof max === 'number')
+    if (input > max)
+      input = max;
+  return input;
+}

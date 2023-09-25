@@ -1,0 +1,42 @@
+.tab {
+  $borderWidth: 1px;
+  -webkit-user-select: none;
+  user-select: none;
+  padding: 0;
+  border: $borderWidth solid #b5b5b5;
+
+  &>.title {
+    box-sizing: border-box;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+
+    &::after,
+    &::before {
+      background-color: #b5b5b5;
+      content: ' ';
+      font-size: 0;
+      flex: 1 1 auto;
+
+      @if $borderWidth>1px {
+        height: $borderWidth;
+      }
+
+      @else {
+        height: calc($borderWidth / var(--dpr, 1));
+      }
+    }
+
+    &::before {
+      max-width: .4rem;
+    }
+
+    &::after {
+      max-width: none;
+    }
+  }
+
+  &>.content {}
+}

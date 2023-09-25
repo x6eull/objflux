@@ -1,4 +1,15 @@
 .autotool {
+  display: flex;
+  flex-direction: column;
+
+  &.horizontal {
+    flex-direction: row;
+
+    &>* {
+      flex-basis: 50%;
+    }
+  }
+
   &>.form {
     display: flex;
     flex-direction: column;

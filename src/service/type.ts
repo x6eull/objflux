@@ -8,6 +8,7 @@ export interface User {
 }
 
 export interface Tool {
+  layout?: 'default' | 'horizontal';
   name: string;
   input: Parameter[];
   func: (...args: any[]) => any | Promise<any>;

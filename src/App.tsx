@@ -41,6 +41,7 @@ function ErrorElement() {
 
 export default function App() {
   return (<React.StrictMode>
+    <style>{`:root{--dpr:${devicePixelRatio}}`}</style>
     <RouterProvider router={router} />
   </React.StrictMode>);
 }

@@ -6,6 +6,7 @@ declare type StringRestriction = {
   minLength?: number;
   validate?: string;
   multiLine?: boolean | number;
+  seperatedInput?: boolean;
 };
 declare type OfString<_T extends StringRestriction> = string;
 

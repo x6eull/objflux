@@ -121,7 +121,7 @@ export class AutoTool extends PureComponent<{ tool: Tool }, { values: any[], out
     const { input } = this.props.tool;
     const vs = this.state.values;
     return (<ErrorBoundary>
-      <div className='autotool'>
+      <div className={'autotool' + (this.props.tool.layout === 'horizontal' ? ' horizontal' : '')}>
         <div className='form'>
           {input.map((p, i) => <AutoPara onChange={(nV) => {
             vs[i] = nV;
@@ -165,7 +165,7 @@ function AutoPara({ para, value, onChange }: { para: Parameter, value: any, onCh
         default:
           throw new Error('无效的multiLine约束');
       }
-      return (<Input maxLength={type.restriction?.maxLength} allowMultiline={ml as any} viewLines={vl as any} onChange={onChange} value={String(value)} title={displayName} required={required} />);
+      return (<Input seperateTitleWithInput={type.restriction?.seperatedInput} maxLength={type.restriction?.maxLength} allowMultiline={ml as any} viewLines={vl as any} onChange={onChange} value={String(value)} title={displayName} required={required} />);
     }
     default:
       throw new Error('暂不支持此输入类型');
