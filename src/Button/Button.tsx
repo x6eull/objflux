@@ -1,5 +1,6 @@
+import { DetailedHTMLProps, HTMLAttributes } from 'react';
 import './Button.scss';
 
-export function Button({ title, onClick }: { title: string, onClick?: React.MouseEventHandler<HTMLDivElement> }) {
-  return (<div onClick={onClick} className='button'>{title}</div>);
+export function Button({ title, onClick, ...oProps }: { title: string, onClick?: React.MouseEventHandler<HTMLDivElement> } & DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>) {
+  return (<div {...oProps} onClick={onClick} className='button'>{title}</div>);
 }

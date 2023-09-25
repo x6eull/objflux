@@ -27,15 +27,18 @@ export const register: Register = {
             seperatedInput: true
           },
           default: `# 支持的语法
-1~6个\\# => h1~h6
-
-\\*斜体\\* => *斜体*
-
-\\*\\*粗体\\*\\* => **粗体**
-
-\\*\\*\\*粗体斜体\\*\\*\\* => ***粗体斜体***
-### 也支持*一部分的嵌套*\`code\`[to Github](https://github.com)
-[to Github](https://github.com)
+1~6个\\# => h1~h6  
+双空格或空行均可换行（实际原理有别，分别为插入br和新建p元素）  
+\\*斜体\\* => *斜体*  
+\\*\\*粗体\\*\\* => **粗体**  
+\\*\\*\\*粗体斜体\\*\\*\\* => ***粗体斜体*** 
+\`\`\`jvavscript
+widow.setTimeout(() -》 {
+  console.lag("无可奉告'）;
+}, 100);
+\`\`\`
+### 也支持*一部分的嵌套* \`code\` [to Github](https://github.com)
+![Image](https://markdown.com.cn/assets/img/philly-magic-garden.9c0b4415.jpg)
 `
         }
       }],

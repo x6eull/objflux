@@ -5,15 +5,37 @@ import { Button } from '../../Button/Button';
 export function Markdown({ source }: { source: string }) {
   const components: React.ReactNode[] = [];
   const lines = source.split(/\r?\n/);
-  //此处不选用foreach以便读下行、跳过空行
-  let currentPara: React.ReactElement[] = [];
-  for (let i = 0; i < lines.length; i++) {
-    const l = lines[i];
+  let currentPara: React.ReactElement[] = [];//在一个<p></p>内的所有内容
+  let inCodeBlock = false;
+  let currentCodeBlock: React.ReactElement[] = [];//在一个代码块内的所有内容
+  function completeCurrentPara() {
+    components.push(<p key={components.length}>{currentPara}</p>);
+    currentPara = [];
+  }
+  function completeCurrentCodeBlock() {
+    components.push(<div style={{ padding: '.8rem 1.2rem', fontFamily: 'Consolas', borderRadius: '6px', background: '#282c34', color: 'white' }} key={components.length}>{currentCodeBlock}</div>);
+    currentCodeBlock = [];
+    inCodeBlock = false;
+  }
+  for (const l of lines) {
+    const isThreeQuote = /^`{3}.*$/.test(l);
+    if (isThreeQuote) {
+      if (!inCodeBlock) {
+        completeCurrentPara();
+        inCodeBlock = true;
+        continue;
+      }
+      completeCurrentCodeBlock();
+      continue;
+    }
+    if (inCodeBlock) {
+      currentCodeBlock.push(<p style={{ margin: 'unset', lineHeight: '1.4em' }} key={currentCodeBlock.length}>{l}</p>);
+      continue;
+    }
     const hashmatch = l.match(/^(?<hash>#+)\s*(?<title>.*)$/);
     if (hashmatch) {
       if (currentPara.length) {
-        components.push(<p key={components.length}>{currentPara}</p>);
-        currentPara = [];
+        completeCurrentPara();
       }
       let hashNo = (hashmatch.groups?.hash as string).length;
       hashNo = limit(hashNo, 1, 6);
@@ -23,11 +45,10 @@ export function Markdown({ source }: { source: string }) {
     }
     const isEmpty = /^\s*$/.test(l);
     if (isEmpty && currentPara.length) {
-      components.push(<p key={components.length}>{currentPara}</p>);
-      currentPara = [];
+      completeCurrentPara();
       continue;
     }
-    const trailingSpace = captureGroup(l, /(?<pre>\S+) {2,}/);
+    const trailingSpace = captureGroup(l, /^(?<pre>.+) {2,}$/);
     if (!trailingSpace)
       currentPara.push(<Fragment key={currentPara.length}>{parseInline(l)}</Fragment>);
     else {
@@ -36,13 +57,15 @@ export function Markdown({ source }: { source: string }) {
     }
   }
   if (currentPara.length)
-    components.push(<p key={components.length}>{currentPara}</p>);
+    completeCurrentPara();
+  if (inCodeBlock)
+    completeCurrentCodeBlock();
   const ref = useRef<HTMLDivElement>(null);
-  return <div><div>Markdown预览<Button onClick={() => {
+  return <div><div>Markdown预览<Button style={{ margin: '0 0 0 1.2rem' }} onClick={() => {
     const result = `<!DOCTYPE HTML>
     <html>
     <head></head>
-    <body>${ref.current?.innerHTML ?? ''}<body>
+    <body>${ref.current?.outerHTML ?? ''}<body>
     </html>`;
     const blob = new Blob([result], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
@@ -50,7 +73,7 @@ export function Markdown({ source }: { source: string }) {
     eleA.href = url;
     eleA.download = 'markdown_export.html';
     eleA.click();
-  }} title='导出' /></div><div ref={ref} style={{ all: 'initial' }}>{components}</div></div>;
+  }} title='导出' /></div><div ref={ref} style={{ whiteSpace: 'pre' }}>{components}</div></div>;
 }
 
 function parseInline(text: string): React.ReactNode {
@@ -70,7 +93,11 @@ function parseInline(text: string): React.ReactNode {
   if (codeMatch) {
     return <>{parseInline(codeMatch.pre)}<code style={{ borderRadius: '3px', background: 'rgba(27,31,35,.12)', padding: '3px 5px', margin: '0 3px' }}>{parseInline(codeMatch.code)}</code>{parseInline(codeMatch.post)}</>;
   }
-  const linkMatch = captureGroup(text, /^(?<pre>.*?)(?<!\\)\[(?<title>.+?)(?!\\)\](?<!\\)\((?<link>.+?)(?!\\)\)(?<post>.*?)$/);
+  const imgMatch = captureGroup(text, /^(?<pre>.*?)(?<!\\)!\[(?<alt>.+?)(?!\\)\]\((?<src>.+?)(\s+(?<title>.*?))?(?!\\)\)(?<post>.*?)$/);
+  if (imgMatch) {
+    return <>{parseInline(imgMatch.pre)}<img src={imgMatch.src} alt={imgMatch.alt} title={imgMatch.title} />{parseInline(imgMatch.post)}</>;
+  }
+  const linkMatch = captureGroup(text, /^(?<pre>.*?)(?<!\\)\[(?<title>.+?)(?!\\)\]\((?<link>.+?)(?!\\)\)(?<post>.*?)$/);
   if (linkMatch) {
     return <>{parseInline(linkMatch.pre)}<a href={linkMatch.link}>{parseInline(linkMatch.title)}</a>{parseInline(linkMatch.post)}</>;
   }
