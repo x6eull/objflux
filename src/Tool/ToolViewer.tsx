@@ -8,7 +8,7 @@ export default function ToolViewer() {
   //TODO 添加工具的信息栏
   const { author, tool } = useLoaderData() as { author: User, tool: Tool };
   return (<div className='toolviewer'>
-    <div className='infobar'>{author.username} / {tool.name}</div>
+    <div className='infobar'><span className='author'>{author.username}</span>/<span className='tool'>{tool.name}</span></div>
     <div className='content'><AutoTool tool={tool} /></div>
   </div>);
 }

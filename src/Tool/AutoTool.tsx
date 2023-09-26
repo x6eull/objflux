@@ -59,9 +59,17 @@ export class AutoTool extends PureComponent<{ tool: Tool }, { values: any[], out
   #rebuild() {
     this.#preTool = this.props.tool;
     this.#clearTimers();
-    const { input, func, output, config } = this.props.tool;
+    let { init, input, func, output, config } = this.props.tool;
     let o = output;
     let f: CalcFunc;
+    if (init) {
+      const initRet = init.call(this.props.tool);
+      if (initRet instanceof Promise)
+        func = async (...values: any[]) => {
+          await initRet;
+          return await this.props.tool.func(...values);
+        };
+    }
     switch (o.keyword) {
       case 'optional':
         //TODO 处理可选输出

@@ -13,7 +13,7 @@ export function Markdown({ source }: { source: string }) {
     currentPara = [];
   }
   function completeCurrentCodeBlock() {
-    components.push(<div style={{ padding: '.8rem 1.2rem', fontFamily: 'Consolas', borderRadius: '6px', background: '#282c34', color: 'white' }} key={components.length}>{currentCodeBlock}</div>);
+    components.push(<pre style={{ padding: '.8rem 1.2rem', fontFamily: 'Consolas', borderRadius: '6px', background: '#282c34', color: 'white' }} key={components.length}>{currentCodeBlock}</pre>);
     currentCodeBlock = [];
     inCodeBlock = false;
   }
@@ -21,12 +21,14 @@ export function Markdown({ source }: { source: string }) {
     const isThreeQuote = /^`{3}.*$/.test(l);
     if (isThreeQuote) {
       if (!inCodeBlock) {
-        completeCurrentPara();
+        if (currentPara.length)
+          completeCurrentPara();
         inCodeBlock = true;
         continue;
+      } else {
+        completeCurrentCodeBlock();
+        continue;
       }
-      completeCurrentCodeBlock();
-      continue;
     }
     if (inCodeBlock) {
       currentCodeBlock.push(<p style={{ margin: 'unset', lineHeight: '1.4em' }} key={currentCodeBlock.length}>{l}</p>);
@@ -77,11 +79,11 @@ export function Markdown({ source }: { source: string }) {
 }
 
 function parseInline(text: string): React.ReactNode {
-  const boldItalicMatch = captureGroup(text, /^(?<pre>.*?)((?<!\\)\*(?<!\\)\*(?<!\\)\*(?<t1>.+?)(?<!\\)\*(?<!\\)\*(?<!\\)\*|(?<!\\)_(?<!\\)_(?<!\\)_(?<t2>.+?)(?<!\\)_(?<!\\)_(?<!\\)_)(?<post>.*?)$/);
+  const boldItalicMatch = captureGroup(text, /^(?<pre>.*?)((?<!\\)\*\*\*(?<t1>.+?)(?<!\\)\*\*\*|(?<!\\)___(?<t2>.+?)(?<!\\)___)(?<post>.*?)$/);
   if (boldItalicMatch) {
     return <>{parseInline(boldItalicMatch.pre)}<strong><i>{parseInline(boldItalicMatch.t1 ?? boldItalicMatch.t2)}</i></strong>{parseInline(boldItalicMatch.post)}</>;
   }
-  const boldMatch = captureGroup(text, /^(?<pre>.*?)((?<!\\)\*(?<!\\)\*(?<t1>.+?)(?<!\\)\*(?<!\\)\*|(?<!\\)_(?<!\\)_(?<t2>.+?)(?<!\\)_(?<!\\)_)(?<post>.*?)$/);
+  const boldMatch = captureGroup(text, /^(?<pre>.*?)((?<!\\)\*\*(?<t1>.+?)(?<!\\)\*\*|(?<!\\)__(?<t2>.+?)(?<!\\)__)(?<post>.*?)$/);
   if (boldMatch) {
     return <>{parseInline(boldMatch.pre)}<strong>{parseInline(boldMatch.t1 ?? boldMatch.t2)}</strong>{parseInline(boldMatch.post)}</>;
   }
