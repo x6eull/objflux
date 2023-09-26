@@ -1,7 +1,6 @@
 import { StringType } from '../../service/type';
+import { notAvailable } from '../../utils/utils';
 import { Register } from '../loader';
-import { Markdown } from './Markdown';
-import { Playground } from './Playground';
 
 export const register: Register = {
   user: { username: 'of' },
@@ -12,7 +11,11 @@ export const register: Register = {
         displayName: '源代码',
         type: { keyword: 'string', restriction: { multiLine: 8 }, default: 'export function myFunc(x:string,y:string){return `${x.length} ${y}`;}' } as StringType,
       }],
-      func: (source: string) => <Playground source={source} />,
+      async init() {
+        const Playground = (await import('./Playground')).Playground;
+        this.func = (source: string) => <Playground source={source} />;
+      },
+      func: notAvailable,
       output: { keyword: 'react.element' },
       config: { calcDelay: 300, pure: true }
     }, {
@@ -42,7 +45,11 @@ widow.setTimeout(() -》 {
 `
         }
       }],
-      func: (source: string) => <Markdown source={source} />,
+      async init() {
+        const Markdown = (await import('./Markdown')).Markdown;
+        this.func = (source: string) => <Markdown source={source} />;
+      },
+      func: notAvailable,
       output: { keyword: 'react.element' },
       config: { calcDelay: 100, pure: true }
     }

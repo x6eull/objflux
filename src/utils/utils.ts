@@ -131,3 +131,5 @@ export function limit(input: number, min?: number, max?: number) {
       input = max;
   return input;
 }
+
+export const notAvailable = () => { throw new Error('Not Available Yet') };

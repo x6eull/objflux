@@ -7,11 +7,13 @@ export interface User {
   username: string;
 }
 
+export type Func = (...args: any[]) => any | Promise<any>;
 export interface Tool {
   layout?: 'default' | 'horizontal';
   name: string;
+  init?: () => void | Promise<void>;
   input: Parameter[];
-  func: (...args: any[]) => any | Promise<any>;
+  func: Func;
   output: InputType | OutputType;
   config: ToolConfig;
 }
