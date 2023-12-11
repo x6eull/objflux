@@ -85,6 +85,8 @@ interface ControlledPromise<T> extends Promise<T> {
 }
 defineProps(Promise.prototype, {
   timeout(ms: number, label?: string): Promise<unknown> {
+    if (ms <= 0)
+      return this;
     return Promise.race([this, new Promise((_, rj) => setTimeout((err: Error) => rj(err), ms, new Error(`Promise Timeout${label ? ` (${label})` : ''}`)))]);
   },
   controlled(): ControlledPromise<unknown> {
