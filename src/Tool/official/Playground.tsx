@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { parseCode } from '../../service/parse';
 import { AutoTool } from '../AutoTool';
-import { Sandbox } from '../../service/Sandbox';
+import { Sandbox } from '../../sandbox/Sandbox';
 
 export function Playground({ source }: { source: string }) {
   const [result, setResult] = useState<React.ReactNode>(() => <div>Loading...</div>);
@@ -11,7 +11,7 @@ export function Playground({ source }: { source: string }) {
       const { emitedText, exportName, para } = parseCode(source);
       (async () => {
         try {
-          const res = await sandbox.eval({ body: 'const et = args[0],en = args[1];return import(`data:text/javascript,${encodeURIComponent(et)}`).then(m=>m[en]??m.default);', args: [emitedText, exportName], doStore: true, doAwait: true, doReturn: false }).timeout(1000, '定义计算函数');
+          const res = await sandbox.eval({ body: 'const et = args[0],en = args[1];return import(`data:text/javascript,${encodeURIComponent(et)}`).then(m=>m[en]??m.default);', args: [emitedText, exportName], doStore: true, doAwait: true, doReturn: false }).catch((err) => setResult(<>运行时出错：{err?.message ?? '未知错误'}</>)).timeout(500, '定义计算函数');
           if (typeof res !== 'object')
             return;
           const id = res.storeIndex;

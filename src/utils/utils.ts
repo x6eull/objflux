@@ -1,3 +1,5 @@
+import { TimeoutError } from './CustomError';
+
 let incrementalId = 0;
 export function newId() {
   return incrementalId++;
@@ -21,11 +23,11 @@ export class Timer {
   #id?: number;
   #timeout(handler: () => void, timeout: number) {
     this.#type = TimerType.Timeout;
-    this.#id = setTimeout(handler, timeout);
+    this.#id = self.setTimeout(handler, timeout);
   }
   #interval(handler: () => void, timeout: number) {
     this.#type = TimerType.Interval;
-    this.#id = setInterval(handler, timeout);
+    this.#id = self.setInterval(handler, timeout);
   }
   clearCurrent() {
     if (typeof this.#id === 'number') {
@@ -83,11 +85,19 @@ interface ControlledPromise<T> extends Promise<T> {
   resolve(reason: T): void;
   reject(reason?: any): void;
 }
+export const resolvedInTimeSymbol = Symbol('Promise Resolved in Time');
 defineProps(Promise.prototype, {
   timeout(ms: number, label?: string): Promise<unknown> {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const requestedPromise = this;
     if (ms <= 0)
-      return this;
-    return Promise.race([this, new Promise((_, rj) => setTimeout((err: Error) => rj(err), ms, new Error(`Promise Timeout${label ? ` (${label})` : ''}`)))]);
+      return requestedPromise;
+    let resolved = false;
+    requestedPromise.then(() => resolved = true);
+    return Promise.race([requestedPromise, new Promise((rs, rj) => setTimeout(() => {
+      if (resolved) rs(resolvedInTimeSymbol);
+      else rj(new TimeoutError(requestedPromise, label));
+    }, ms))]);
   },
   controlled(): ControlledPromise<unknown> {
     let conRs, conRj;

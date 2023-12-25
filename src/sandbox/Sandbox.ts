@@ -1,9 +1,5 @@
 import { StringRecord } from '../utils/utils';
-import sandboxWorkerScript from './sandboxWorkerScript.js?raw';
-
-function toDataURL(js: string) {
-  return `data:text/javascript,${encodeURIComponent(js)}`;
-}
+import workerScript from './sandboxWorkerScript.js?raw';
 
 let sandboxId = 0;
 enum State {
@@ -23,7 +19,11 @@ export class Sandbox {
   private __onmessage = (...args: [MessageEvent]) => this.#acceptMessage(...args);
   constructor() {
     this.#key = 10000000 + Math.floor(Math.random() * 89999999);
-    this.#worker = new Worker(toDataURL(sandboxWorkerScript), { credentials: 'omit', type: 'module', name: `sandbox_${this.id}` });
+    this.#worker = new Worker(`data:text/javascript;base64,${self.encodeURIComponent(self.btoa(workerScript))}`, {
+      name: `sandbox_${this.id}`,
+      type: 'module',
+      credentials: 'omit'
+    });
     this.#worker.addEventListener('message', this.__onmessage);
   }
 
@@ -62,7 +62,7 @@ export class Sandbox {
       case 'init.listening':
         if (this.state !== State.Initing)
           break;
-        this.#worker.postMessage({ type: 'init.key', key: this.#key });
+        this.#send({ type: 'init.key', key: this.#key });
         break;
       case 'init.ready':
         if (ev.data?.key !== this.#key)
@@ -89,7 +89,7 @@ export class Sandbox {
 
   /**销毁此沙箱。销毁的实例不能再次初始化。 */
   dispose() {
-    this.#worker?.removeEventListener('message', this.__onmessage);
+    self.removeEventListener('message', this.__onmessage);
     this.state = State.Disposed;
     this.#worker?.terminate();
     this.#worker = undefined as any;

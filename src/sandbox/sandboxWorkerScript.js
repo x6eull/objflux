@@ -3,7 +3,11 @@
   const ___store = [];
   const openKey = Math.floor(Math.random() * 99999999).toString();
   let key;
+  const _Function = Function;
+  const _Array_push = Array.prototype.push;
   self.addEventListener('message', async (ev) => {
+    if (!ev.isTrusted)
+      return;
     switch (ev.data.type) {
       case 'init.key': {
         key = ev.data.key;
@@ -16,11 +20,11 @@
         try {
           const fargList = (useStore ? 'store,' : '') + '...args';
           const fargs = useStore ? [___store[withStore], ...args] : [...args];
-          let r = (new Function(fargList, body))(...fargs);
+          let r = (new _Function(fargList, body))(...fargs);
           if (doAwait)
             r = await r;
           if (doStore)
-            ___store.push(r);
+            _Array_push.call(___store, r);
           if (doMessage)
             return sendBack({ type: 'eval.result', storeIndex: doStore ? ___store.length - 1 : null, evalResult: doReturn ? r : null, msgId: ev.data.msgId, key });
         } catch (er) {
@@ -31,20 +35,18 @@
       }
     }
   });
-  const postMessage = self.postMessage.bind(self);
+  const _postMessage = self.postMessage.bind(self);
   function sendBack(fullData) {
-    postMessage(fullData);
+    _postMessage(fullData);
   }
-  /**
-   * @param {{target:object,filter?:((key:string|symbol,descriptor:PropertyDescriptor)=>boolean)|((string|symbol|RegExp)[]),replaceWith?:(key:string|symbol,descriptor:PropertyDescriptor)=>PropertyDescriptor?}[]} config 
-   */
   function restrictAPI(config) {
     for (const c of config) {
       const target = c.target;
-      const proDescriptors = Object.getOwnPropertyDescriptors(target);
-      const proNames = Reflect.ownKeys(proDescriptors);
-      for (const key of proNames) {
-        const oriDesc = proDescriptors[key];
+      const targetKeys = Reflect.ownKeys(target);
+      // const proDescriptors = Object.getOwnPropertyDescriptors(target);
+      // const proNames = Reflect.ownKeys(proDescriptors);
+      for (const key of targetKeys) {
+        const oriDesc = Object.getOwnPropertyDescriptor(target, key);
         if (Array.isArray(c.filter) && arrayMatch(c.filter, key) !== true)
           continue;
         if (typeof c.filter === 'function' && c.filter.call(c, key, oriDesc) !== true)
@@ -60,14 +62,16 @@
             }
           };
         const result = Reflect.defineProperty(target, key, newDesc);
-        if (!result) throw new Error('Restriction Failed', key, target);
+        if (!result) console.error('Restriction Failed', target, key);
       }
     }
   }
+  const _RegExp = RegExp;
+  const _RegExp_test = RegExp.prototype.test;
   function arrayMatch(array, target) {
     return array.some((v) => {
-      if (v instanceof RegExp)
-        return typeof key === 'string' && v.test(target);
+      if (v instanceof _RegExp)
+        return typeof target === 'string' && _RegExp_test.call(v, target);
       return target === v;
     });
   }
@@ -82,10 +86,10 @@
         return !arrayMatch(allowed, key);
       }
     }, {
-      target: self.WorkerGlobalScope.prototype,
+      target: self.WorkerGlobalScope?.prototype ?? Reflect.getPrototypeOf(self),
       filter: ['fetch']
     }, {
-      target: self.WorkerLocation.prototype ?? Reflect.getPrototypeOf(self.location),
+      target: self.WorkerLocation?.prototype ?? Reflect.getPrototypeOf(self.location),
       _replacer: { href: 'objflux/sandbox/' + openKey, pathname: '/sandbox/' + openKey },
       filter(key) { return key in this._replacer },
       replaceWith(key) { return { get: () => this._replacer[key] } }
