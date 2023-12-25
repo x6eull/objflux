@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import { createBrowserRouter, isRouteErrorResponse, Outlet, RouterProvider, useRouteError } from 'react-router-dom';
 import './main.scss';
 import { IndexElement } from './Index/Index';
@@ -17,12 +17,6 @@ const router = createBrowserRouter([
     </>),
     children: [
       { index: true, element: <IndexElement /> },
-      {
-        path: 'explore', element: (<Suspense>
-          <div style={{ display: 'flex', 'flexDirection': 'column', width: '100%', height: '100%' }}>
-          </div>
-        </Suspense>)
-      },
       toolRoute
     ]
   },

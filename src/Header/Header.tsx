@@ -8,7 +8,6 @@ export function Header() {
       <nav className='nav'>
         <Link className='logo' to='/'>objflux</Link>
         <div className='sectors'>
-          <SectorLink title='探索' to='/explore' />
           <SectorLink title='库' to='/lib' />
           <SectorLink title='工具' to='/tool' />
           <SectorLink title='文档' reloadDocument={true} to={docsUrl} />
