@@ -114,16 +114,6 @@ defineProps(Promise.prototype, {
   }
 });
 
-export function combine(...funcs: (((...args: any[]) => any) | undefined)[]): (...args: any[]) => any {
-  const fs: ((...args: any[]) => any)[] = funcs.filter(f => f instanceof Function) as any;
-  return (...args) => {
-    let rv;
-    for (const f of fs)
-      rv = f(...args);
-    return rv;
-  };
-}
-
 export function scopedVar<T>(init: T): { get(): T, set(v: T): void } {
   return (() => {
     let __var = init;
