@@ -21,6 +21,7 @@ enum TimerType {
 export class Timer {
   #type?: TimerType;
   #id?: number;
+  static delay(timeout: number): Promise<void> { return new Promise((r) => setTimeout(r, timeout)) }
   #timeout(handler: () => void, timeout: number) {
     this.#type = TimerType.Timeout;
     this.#id = self.setTimeout(handler, timeout);
@@ -85,7 +86,7 @@ interface ControlledPromise<T> extends Promise<T> {
   resolve(reason: T): void;
   reject(reason?: any): void;
 }
-export const resolvedInTimeSymbol = Symbol('Promise Resolved in Time');
+export const resolvedInTimeSymbol = Symbol('Promise resolved in time');
 defineProps(Promise.prototype, {
   timeout(ms: number, label?: string): Promise<unknown> {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -114,16 +115,6 @@ defineProps(Promise.prototype, {
   }
 });
 
-export function scopedVar<T>(init: T): { get(): T, set(v: T): void } {
-  return (() => {
-    let __var = init;
-    return {
-      get() { return __var },
-      set(v: T) { __var = v }
-    };
-  })();
-}
-
 export function limit(input: number, min?: number, max?: number) {
   if (typeof min === 'number')
     if (input < min)
@@ -134,4 +125,12 @@ export function limit(input: number, min?: number, max?: number) {
   return input;
 }
 
-export const notAvailable = () => { throw new Error('Not Available Yet') };
+export function makeAsync<I extends unknown[], O>(from: ((...args: I) => O) | ((...args: I) => Promise<O>), preTask?: () => void, postTask?: () => void)
+  : (...args: I) => Promise<O> {
+  return async (...args) => {
+    preTask?.();
+    const result = await from(...args);
+    postTask?.();
+    return result;
+  };
+}

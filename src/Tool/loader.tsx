@@ -1,4 +1,4 @@
-import { User, Tool } from '../service/type';
+import { User, Tool } from '../core/type';
 
 export interface Register {
   user: User,

@@ -10,3 +10,10 @@ export class TimeoutError<T> extends CustomError {
     this.label = label;
   }
 }
+
+export class OfTypeError extends CustomError {
+}
+
+export class ToolError extends CustomError { }
+export class InitError extends ToolError { }
+export class ComputeError extends ToolError { }

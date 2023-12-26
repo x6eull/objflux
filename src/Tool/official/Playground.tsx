@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { parseCode } from '../../service/parse';
+import { parseCode } from '../../core/parse';
 import { AutoTool } from '../AutoTool';
 import { Sandbox } from '../../sandbox/Sandbox';
 

@@ -1,6 +1,5 @@
-import { StringType } from '../../service/type';
-import { notAvailable } from '../../utils/utils';
-import { Register } from '../loader';
+import { StringType, availableAfterInitingSymbol } from '../../core/type';
+import { type Register } from '../loader';
 
 export const register: Register = {
   user: { username: 'of' },
@@ -15,9 +14,9 @@ export const register: Register = {
         const Playground = (await import('./Playground')).Playground;
         this.func = (source: string) => <Playground source={source} />;
       },
-      func: notAvailable,
+      func: availableAfterInitingSymbol,
       output: { keyword: 'react.element' },
-      config: { calcDelay: 300, pure: true }
+      config: { calcDelay: 100, pure: true }
     }, {
       name: 'markdown',
       layout: 'horizontal',
@@ -49,9 +48,9 @@ widow.setTimeout(() -》 {
         const Markdown = (await import('./Markdown')).Markdown;
         this.func = (source: string) => <Markdown source={source} />;
       },
-      func: notAvailable,
+      func: availableAfterInitingSymbol,
       output: { keyword: 'react.element' },
-      config: { calcDelay: 100, pure: true }
+      config: { calcDelay: 50, pure: true }
     }
   ]
 };

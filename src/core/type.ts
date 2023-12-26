@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
+import { OfTypeError } from '../utils/CustomError';
 import { RecordNever, StringRecord } from '../utils/utils';
 
 
@@ -7,13 +8,14 @@ export interface User {
   username: string;
 }
 
+export const availableAfterInitingSymbol = Symbol('Function available after initing');
 export type Func = (...args: any[]) => any | Promise<any>;
 export interface Tool {
   layout?: 'default' | 'horizontal';
   name: string;
   init?: () => void | Promise<void>;
   input: Parameter[];
-  func: Func;
+  func: Func | typeof availableAfterInitingSymbol;
   output: InputType | OutputType;
   config: ToolConfig;
 }
@@ -55,7 +57,7 @@ export interface OptionalType<T extends InputType = InputType> extends TypeBase<
 /**将类型转换为其可选变体，如果类型已经可选则throw。 */
 export function toOptional<T extends InputType>(type: T): OptionalType<T> {
   if (type.keyword === 'optional')
-    throw new Error('无法重复设置类型的可选性');
+    throw new OfTypeError('无法重复设置类型的可选性');
   return { keyword: 'optional', base: type };
 }
 

@@ -1,9 +1,10 @@
 import { PureComponent, ReactNode } from 'react';
 import { Input } from '../Input/Input';
-import { Parameter, Tool, InputType, ObjectType } from '../service/type';
-import { StringRecord, Timer, switchString } from '../utils/utils';
+import { Parameter, Tool, InputType, ObjectType, Func } from '../core/type';
+import { StringRecord, Timer, makeAsync, switchString } from '../utils/utils';
 import './AutoTool.scss';
 import ErrorBoundary from '../utils/ErrorBoundary';
+import { ComputeError, InitError } from '../utils/CustomError';
 
 function getDefaultValue(type: InputType) {
   if (type.keyword === 'optional')
@@ -25,7 +26,7 @@ function getDefaultValue(type: InputType) {
 }
 
 
-type CalcFunc = (...values: any[]) => ReactNode;
+type CalcFunc = (...values: any[]) => Promise<ReactNode>;
 /**由指定信息自动生成工具的输入UI，并在输入更新时自动调用`func`计算输出。
  * 要修改任何信息必须修改`props`中`tool`的指针。 */
 export class AutoTool extends PureComponent<{ tool: Tool }, { values: any[], outputToRender: ReactNode }> {
@@ -39,6 +40,7 @@ export class AutoTool extends PureComponent<{ tool: Tool }, { values: any[], out
     this.#timer2.clearCurrent();
   }
   componentWillUnmount() {
+    this.#mounted = false;
     this.#clearTimers();
   }
   componentDidMount() {
@@ -48,27 +50,64 @@ export class AutoTool extends PureComponent<{ tool: Tool }, { values: any[], out
   #timer2: Timer = new Timer();
   #preTool: Tool = undefined as any;
   /**由输入改变触发的重新计算。 */
-  #iCalc() {
+  #inputCalc() {
+    const toCalc = () => {
+      if (this.#calculating) {
+        this.#requestNewCalc++;
+        console.warn(`${this.#requestNewCalc} request(s) new calc during calculating`);
+      }
+      else this.#calc();
+    };
     const { calcDelay } = this.props.tool.config;
     if (calcDelay)
-      this.#timer2.timeout(() => this.#calc(), calcDelay, false);
-    else this.#calc();
+      this.#timer2.timeout(toCalc, calcDelay, false);
+    else toCalc();
   }
+  #calculating = false;
+  #requestNewCalc = 0;
   /**请求立即重新计算，考虑纯函数优化。 */
   #calc: () => ReactNode | Promise<ReactNode> = undefined as any;
   #rebuild() {
     this.#preTool = this.props.tool;
     this.#clearTimers();
-    let { init, input, func, output, config } = this.props.tool;
+    const tool = this.props.tool;
+    const { init, input, func: initialFunc, output, config } = tool;
     let o = output;
-    let f: CalcFunc;
+    let computeFunc: Func;//先跑init，init同步/异步返回时改为指向tool.func
+    let rerenderFunc: CalcFunc;
+    const setComputeFunc = (func: Func) => computeFunc = makeAsync(func,
+      () => this.#calculating = true,
+      () => {
+        this.#calculating = false;
+        if (this.#requestNewCalc) {
+          this.#requestNewCalc = 0;
+          this.#calc();
+        }
+      });
     if (init) {
       const initRet = init.call(this.props.tool);
-      if (initRet instanceof Promise)
-        func = async (...values: any[]) => {
+      if (initRet instanceof Promise) {
+        setComputeFunc(async (...values: any[]) => {
           await initRet;
-          return await this.props.tool.func(...values);
-        };
+          if (typeof tool.func !== 'function')
+            throw new ComputeError('Tool lacks func after initing (async, temp computeFunc)');
+          return await tool.func(...values);
+        });
+        initRet.then(() => {
+          if (typeof tool.func !== 'function')
+            throw new ComputeError('Tool lacks func after initing (async, then)');
+          setComputeFunc(tool.func);
+        });
+      }
+      else {
+        if (typeof tool.func !== 'function')
+          throw new InitError('Tool lacks func after initing (sync)');
+        else setComputeFunc(tool.func);
+      }
+    } else {
+      if (typeof initialFunc !== 'function')
+        throw new InitError('Tool lacks both init and func');
+      else setComputeFunc(initialFunc);
     }
     switch (o.keyword) {
       case 'optional':
@@ -76,7 +115,7 @@ export class AutoTool extends PureComponent<{ tool: Tool }, { values: any[], out
         o = o.base;
       // falls through
       case 'react.element':
-        f = (...values: any[]) => func(...values);
+        rerenderFunc = async (...values: any[]) => await computeFunc(...values);
         break;
       default:
         throw new Error('暂不支持此输出类型');
@@ -85,35 +124,36 @@ export class AutoTool extends PureComponent<{ tool: Tool }, { values: any[], out
     if (config.pure) {
       let preValues: any[] = [];
       let preOutput: ReactNode = undefined;
-      const _f = f;
-      f = (...values: any[]) => {
-        if (values.length !== preValues.length || values.some((v, i) => v !== preValues[i])) {
+      const baseRerender = rerenderFunc;
+      rerenderFunc = async (...values: any[]) => {
+        if (values.length !== preValues.length || values.some((v, i) => !Object.is(v, preValues[i]))) {
           preValues = values;
-          preOutput = _f(...values);
+          preOutput = await baseRerender(...values);
           return preOutput;
         }
         return preOutput;
       };
     }
-    //添加检测是否挂载封装
+    //检测是否挂载
     this.#calc = () => {
-      const setOtr = (otr: ReactNode) => {
+      const setOutputToRender = (outputNode: ReactNode) => {
         if (this.#mounted)
-          this.setState({ outputToRender: otr });
-        else this.state = { ...this.state, outputToRender: otr };
-        return otr;
+          this.setState({ outputToRender: outputNode });
+        else this.state = { ...this.state, outputToRender: outputNode };
+        return outputNode;
       };
-      const setError = (err: any) => {
+      const setError = (err?: any) => {
         console.error('计算函数出错', err);
-        return setOtr(<>计算函数出错: {err?.message ?? '无错误信息'}</>);
+        return setOutputToRender(<>计算函数出错: {err?.message ?? '未知错误'}</>);
       };
       try {
-        const outputToRender = f(...this.state.values);
+        const outputToRender = rerenderFunc(...this.state.values);
         if (outputToRender instanceof Promise)
-          return outputToRender.then(setOtr).catch(setError);
-        return setOtr(outputToRender);
-      } catch (err) {
-        return setError(err);
+          return outputToRender.then(setOutputToRender).catch(setError);
+        else
+          return setOutputToRender(outputToRender);
+      } catch (errCaught) {
+        return setError(errCaught);
       }
     };
     if (config.calcInterval) {
@@ -134,7 +174,7 @@ export class AutoTool extends PureComponent<{ tool: Tool }, { values: any[], out
           {input.map((p, i) => <AutoPara onChange={(nV) => {
             vs[i] = nV;
             this.setState({ values: [...vs] });
-            this.#iCalc();
+            this.#inputCalc();
           }} value={vs[i]} key={p.devName ?? p.displayName} para={p} />)}
         </div>
         <div className='result'>
