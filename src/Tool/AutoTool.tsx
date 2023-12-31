@@ -4,7 +4,7 @@ import { Parameter, Tool, InputType, ObjectType, Func } from '../core/type';
 import { StringRecord, Timer, makeAsync, switchString } from '../utils/utils';
 import './AutoTool.scss';
 import ErrorBoundary from '../utils/ErrorBoundary';
-import { ComputeError, InitError } from '../utils/CustomError';
+import { ComputeError, InitError, OfTypeError } from '../utils/CustomError';
 
 function getDefaultValue(type: InputType) {
   if (type.keyword === 'optional')
@@ -95,7 +95,7 @@ export class AutoTool extends PureComponent<{ tool: Tool }, { values: any[], out
         });
         initRet.then(() => {
           if (typeof tool.func !== 'function')
-            throw new ComputeError('Tool lacks func after initing (async, then)');
+            throw new ComputeError('Tool lacks func after initing (async, promise callback)');
           setComputeFunc(tool.func);
         });
       }
@@ -118,7 +118,7 @@ export class AutoTool extends PureComponent<{ tool: Tool }, { values: any[], out
         rerenderFunc = async (...values: any[]) => await computeFunc(...values);
         break;
       default:
-        throw new Error('暂不支持此输出类型');
+        throw new OfTypeError('暂不支持此输出类型');
     }
     //纯函数优化，仅跳过计算，可能不跳过重绘
     if (config.pure) {
@@ -211,11 +211,11 @@ function AutoPara({ para, value, onChange }: { para: Parameter, value: any, onCh
           vl = rMl;
           break;
         default:
-          throw new Error('无效的multiLine约束');
+          throw new OfTypeError('无效的multiLine约束');
       }
       return (<Input seperateTitleWithInput={type.restriction?.seperatedInput} maxLength={type.restriction?.maxLength} allowMultiline={ml as any} viewLines={vl as any} onChange={onChange} value={String(value)} title={displayName} required={required} />);
     }
     default:
-      throw new Error('暂不支持此输入类型');
+      throw new OfTypeError('暂不支持此输入类型');
   }
 }

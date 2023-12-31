@@ -158,7 +158,7 @@ export function parseCode(code: string) {
       })]
     }
   );
-  env.createFile('user.ts', code);
+  env.createFile('user.ts', code || '//Empty');
   const emitedText = env.languageService.getEmitOutput('user.ts').outputFiles[0].text;
   if (!exportName)
     throw new Error('缺少导出函数');

@@ -134,3 +134,23 @@ export function makeAsync<I extends unknown[], O>(from: ((...args: I) => O) | ((
     return result;
   };
 }
+
+export function combineTokens(...tokens: (string | undefined)[]): string {
+  const resTokens = new Set<string>();
+  tokens.forEach(ts => {
+    ts = ts?.trim();
+    if (!ts) return;
+    ts.split(' ').forEach(t => {
+      t = t.trim();
+      if (t)
+        resTokens.add(t);
+    });
+  });
+  let result = '';
+  for (const t of resTokens) {
+    if (result)
+      result += ' ';
+    result += t;
+  }
+  return result;
+}

@@ -14,6 +14,9 @@ export class TimeoutError<T> extends CustomError {
 export class OfTypeError extends CustomError {
 }
 
+//#region ToolError
 export class ToolError extends CustomError { }
+
 export class InitError extends ToolError { }
 export class ComputeError extends ToolError { }
+//#endregion
