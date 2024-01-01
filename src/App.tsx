@@ -3,7 +3,7 @@ import { createBrowserRouter, isRouteErrorResponse, Outlet, RouterProvider, useR
 import './main.scss';
 import { IndexElement } from './Index/Index';
 import { Header } from './Header/Header';
-import { toolRoute } from './Tool/ToolRoute';
+import { toolRoute } from './tool/ToolRoute';
 
 const router = createBrowserRouter([
   {
