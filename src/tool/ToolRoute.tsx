@@ -2,11 +2,9 @@ import { Outlet, RouteObject, useRouteError } from 'react-router-dom';
 import ToolViewer from './ToolViewer';
 import { get, load } from './loader';
 import { register as officlaRegister } from './official';
-import { Suspense, lazy } from 'react';
+import LazyComponent from '../utils/LazyComponent';
 
 load(officlaRegister);
-// eslint-disable-next-line react-refresh/only-export-components
-const LazyToolListPage = lazy(() => import('./ToolListPage.tsx'));
 export const toolRoute: RouteObject =
 {
   path: 'tool',
@@ -15,7 +13,7 @@ export const toolRoute: RouteObject =
   children: [
     {
       index: true,
-      element: <Suspense fallback={<>Loading tool list page...</>}><LazyToolListPage /></Suspense>
+      element: <LazyComponent factory={() => import('./ToolListPage.tsx')} />
     },
     {
       //考虑修改路径样式，加/u/或/t/ ?

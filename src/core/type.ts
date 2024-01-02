@@ -18,7 +18,7 @@ export interface Tool {
   input: Parameter[];
   func: Func | typeof availableAfterInitingSymbol;
   output: InputType | OutputType;
-  config: ToolConfig;
+  config?: ToolConfig;
 }
 
 export interface ToolConfig {

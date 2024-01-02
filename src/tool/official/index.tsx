@@ -31,7 +31,7 @@ export const register: Register = {
           },
           default: `# 支持的语法
 1~6个\\# => h1~h6  
-双空格或空行均可换行（实际原理有别，分别为插入br和新建p元素）  
+双空格或空行均可换行 
 \\*斜体\\* => *斜体*  
 \\*\\*粗体\\*\\* => **粗体**  
 \\*\\*\\*粗体斜体\\*\\*\\* => ***粗体斜体*** 
@@ -52,6 +52,11 @@ widow.setTimeout(() -》 {
       func: availableAfterInitingSymbol,
       output: { keyword: 'react.element' },
       config: { calcDelay: 50, pure: true }
+    }, {
+      name: 'toUpper',
+      output: { keyword: 'string' },
+      func(from: string): string { return from.toUpperCase() },
+      input: [{ displayName: 'from', type: { keyword: 'string' } }]
     }
   ]
 };

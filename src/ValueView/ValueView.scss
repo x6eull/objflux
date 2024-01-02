@@ -10,10 +10,11 @@ $empty-token: #1f1f1f61;
 
 .token {
   white-space: pre-wrap;
-  font-family: Consolas;
+  font-family: consolas, lucida console, courier new, monospace;
   cursor: default;
   -webkit-user-select: text;
   user-select: text;
+  word-break: break-all;
 
   &.string {
     color: $special-token;

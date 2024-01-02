@@ -3,7 +3,7 @@ import './Bench.scss';
 
 export default function Bench() {
   return (<div className='bench'>
-    <ValueList items={['str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123str123123', 123.456, null, undefined]} />
+    <ValueList items={['此功能尚在开发', 123.456, null, undefined]} />
   </div>);
 }
 

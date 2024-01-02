@@ -5,6 +5,7 @@ import { StringRecord, Timer, makeAsync } from '../utils/utils';
 import './AutoTool.scss';
 import ErrorBoundary from '../utils/ErrorBoundary';
 import { ComputeError, InitError, OfTypeError } from '../utils/CustomError';
+import { AutoToken } from '../ValueView/ValueView';
 
 function getDefaultValue(type: InputType) {
   if (type.keyword === 'optional')
@@ -58,7 +59,7 @@ export class AutoTool extends PureComponent<{ tool: Tool }, { values: any[], out
       }
       else this.#calc();
     };
-    const { calcDelay } = this.props.tool.config;
+    const { calcDelay } = this.props.tool.config ?? {};
     if (calcDelay)
       this.#timer2.timeout(toCalc, calcDelay, false);
     else toCalc();
@@ -71,7 +72,7 @@ export class AutoTool extends PureComponent<{ tool: Tool }, { values: any[], out
     this.#preTool = this.props.tool;
     this.#clearTimers();
     const tool = this.props.tool;
-    const { init, input, func: initialFunc, output, config } = tool;
+    const { init, input, func: initialFunc, output, config = {} } = tool;
     let o = output;
     let computeFunc: Func;//先跑init，init同步/异步返回时改为指向tool.func
     let rerenderFunc: CalcFunc;
@@ -116,6 +117,13 @@ export class AutoTool extends PureComponent<{ tool: Tool }, { values: any[], out
       // falls through
       case 'react.element':
         rerenderFunc = async (...values: any[]) => await computeFunc(...values);
+        break;
+      case 'string':
+      case 'number':
+        rerenderFunc = async (...values: any[]) => {
+          const calcResult = await computeFunc(...values);
+          return <AutoToken value={calcResult} />;
+        };
         break;
       default:
         throw new OfTypeError('暂不支持此输出类型');
@@ -185,6 +193,7 @@ export class AutoTool extends PureComponent<{ tool: Tool }, { values: any[], out
   }
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 function AutoPara({ para, value, onChange }: { para: Parameter, value: any, onChange: (v: any) => void }) {
   let { type, displayName } = para;
   let required = true;
