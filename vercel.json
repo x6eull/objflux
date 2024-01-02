@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/(lib|tool)/(.*)?",
+      "source": "/(bench|lib|tool)/(.*)?",
       "destination": "/index.html"
     }
   ],

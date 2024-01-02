@@ -5,7 +5,7 @@ import App from './App';
 
 import './utils/utils';
 
-export const docsUrl = '/';
+export const docsUrl = 'https://docs.objflux.com';
 export const hostname = 'objflux.com';
 const hostnameGuard = /^objflux.com|localhost$/;
 if (!hostnameGuard.test(location.hostname) && readConfig('disableHostnameGuard') !== '1')

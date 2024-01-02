@@ -30,7 +30,7 @@ function ToolList({ items = [] }: { items?: { name: string, lastModified?: Date,
           i.onclick?.();
         }} key={index}>
           <td>{i.name}</td>
-          <td>{i.lastModified?.toLocaleString() ?? '未知'}</td>
+          <td>{i.lastModified?.toLocaleString() ?? ''}</td>
         </tr>))}
       </tbody>
     </table>

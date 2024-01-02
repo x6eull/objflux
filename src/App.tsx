@@ -1,9 +1,9 @@
 import React from 'react';
-import { createBrowserRouter, isRouteErrorResponse, Outlet, RouterProvider, useRouteError } from 'react-router-dom';
+import { createBrowserRouter, isRouteErrorResponse, Navigate, Outlet, RouterProvider, useRouteError } from 'react-router-dom';
 import './main.scss';
-import { IndexElement } from './Index/Index';
 import { Header } from './Header/Header';
 import { toolRoute } from './tool/ToolRoute';
+import { benchRoute } from './bench/benchRoute';
 
 const router = createBrowserRouter([
   {
@@ -16,7 +16,16 @@ const router = createBrowserRouter([
       </div>
     </>),
     children: [
-      { index: true, element: <IndexElement /> },
+      {
+        index: true,
+        path: '/',
+        element: <Navigate to='/bench' />
+      },
+      {
+        path: '/lib',
+        element: <>此功能尚在开发</>
+      },
+      benchRoute,
       toolRoute
     ]
   },

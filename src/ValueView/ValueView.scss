@@ -1,0 +1,29 @@
+//输出的特殊token，如字符串、Symbol
+$special-token: #dc362e;
+//输出的数字token
+$number-token: #0842a0;
+//输出bigint 注释同色
+$bigint-token: #146c2e;
+$comment-token: #146c2e;
+//输出undefined null
+$empty-token: #1f1f1f61;
+
+.token {
+  white-space: pre-wrap;
+  font-family: Consolas;
+  cursor: default;
+  -webkit-user-select: text;
+  user-select: text;
+
+  &.string {
+    color: $special-token;
+  }
+
+  &.number {
+    color: $number-token;
+  }
+
+  &:is(.null, .undefined) {
+    color: $empty-token;
+  }
+}
