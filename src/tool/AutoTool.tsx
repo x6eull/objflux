@@ -1,7 +1,7 @@
 import { PureComponent, ReactNode } from 'react';
 import { Input } from '../Input/Input';
 import { Parameter, Tool, InputType, ObjectType, Func } from '../core/type';
-import { StringRecord, Timer, makeAsync, switchString } from '../utils/utils';
+import { StringRecord, Timer, makeAsync } from '../utils/utils';
 import './AutoTool.scss';
 import ErrorBoundary from '../utils/ErrorBoundary';
 import { ComputeError, InitError, OfTypeError } from '../utils/CustomError';
@@ -9,20 +9,20 @@ import { ComputeError, InitError, OfTypeError } from '../utils/CustomError';
 function getDefaultValue(type: InputType) {
   if (type.keyword === 'optional')
     type = type.base;
-  return type.default ?? switchString<any>(type.keyword, {
-    string: '',
-    number: 0,
-    object() {
+  if (typeof type.default !== 'undefined')
+    return type.default;
+  switch (type.keyword) {
+    case 'string': return '';
+    case 'number': return 0;
+    case 'object': {
       const v: StringRecord = {};
       const otype = type as ObjectType;
       for (const [mn, mt] of Object.entries(otype.members))
-        if ('default' in mt)
-          v[mn] = mt.default;
-        else
-          v[mn] = getDefaultValue(mt);
+        v[mn] = getDefaultValue(mt);
       return v;
     }
-  }, undefined);
+  }
+  throw new OfTypeError(`无法提供${type.keyword}的默认值`);
 }
 
 

@@ -53,16 +53,6 @@ export class Timer {
   }
 }
 
-type To<T, F> = T | ((from: F) => T);
-/**注意，如果不提供`defaultSwitch`且未匹配，则返回`undefined`。 */
-export function switchString<R>(value: string, handler: { [on: string]: To<R, string> }, defaultReturn?: R): R {
-  for (const [on, ret] of Object.entries(handler)) {
-    if (Object.is(value, on))
-      return ret instanceof Function ? ret(value) : ret;
-  }
-  return defaultReturn as R;
-}
-
 function defineProps<T extends object>(target: T, props: { [key: PropertyKey]: any } & ThisType<T>): T {
   const desc: PropertyDescriptorMap = {};
   for (const key of Reflect.ownKeys(props))
@@ -77,7 +67,9 @@ function defineProps<T extends object>(target: T, props: { [key: PropertyKey]: a
 
 declare global {
   interface Promise<T> {
+    /**包装后返回一个新Promise，如原Promise未在限时内完成，则reject */
     timeout(ms: number, label?: string): Promise<T>;
+    /**包装后返回一个可在原Promise结束前`resolve`或`reject`的Promise */
     controlled(): ControlledPromise<T>;
   }
 }
@@ -125,7 +117,8 @@ export function limit(input: number, min?: number, max?: number) {
   return input;
 }
 
-export function makeAsync<I extends unknown[], O>(from: ((...args: I) => O) | ((...args: I) => Promise<O>), preTask?: () => void, postTask?: () => void)
+/**包装指定函数，返回异步函数 */
+export function makeAsync<I extends any[], O>(from: ((...args: I) => O) | ((...args: I) => Promise<O>), preTask?: () => void, postTask?: () => void)
   : (...args: I) => Promise<O> {
   return async (...args) => {
     preTask?.();
@@ -135,6 +128,7 @@ export function makeAsync<I extends unknown[], O>(from: ((...args: I) => O) | ((
   };
 }
 
+/**连接多个以空格分割的token串 */
 export function combineTokens(...tokens: (string | undefined)[]): string {
   const resTokens = new Set<string>();
   tokens.forEach(ts => {

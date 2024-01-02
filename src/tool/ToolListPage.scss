@@ -1,0 +1,72 @@
+.toollistpage {
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: .8rem 1.2rem;
+
+  .search {
+    font-size: 1.05em;
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: .9em;
+
+    &>table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+      empty-cells: show;
+
+      thead th {
+        font-weight: inherit;
+        text-align: left;
+        color: #224c6d;
+
+        &:hover {
+          background-color: #d9ebf9;
+        }
+
+        &:not(:last-child) {
+          border-right: 1px solid #e5e5e5;
+        }
+
+        &.name {
+          width: 70%;
+        }
+      }
+
+      th,
+      td {
+        -webkit-user-select: none;
+        user-select: none;
+        box-sizing: border-box;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        padding: .2em .4em;
+      }
+
+      tbody>tr {
+        cursor: pointer;
+
+        &:hover {
+          background-color: #e5f3ff;
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .empty {
+      margin-top: .25em;
+      color: #6d6d6d;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  }
+}

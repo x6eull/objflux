@@ -13,6 +13,7 @@ export type Func = (...args: any[]) => any | Promise<any>;
 export interface Tool {
   layout?: 'default' | 'horizontal';
   name: string;
+  lastModified?: Date;
   init?: () => void | Promise<void>;
   input: Parameter[];
   func: Func | typeof availableAfterInitingSymbol;

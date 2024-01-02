@@ -6,6 +6,7 @@ export const register: Register = {
   tools: [
     {
       name: 'playground',
+      lastModified: new Date(2024, 1, 1, 0, 0, 0),
       input: [{
         displayName: '源代码',
         type: { keyword: 'string', restriction: { multiLine: 8 }, default: 'export function myFunc(x:string,y:string){return `${x.length} ${y}`;}' } as StringType,
