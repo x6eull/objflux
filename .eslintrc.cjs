@@ -14,6 +14,7 @@ module.exports = {
     semi: [1, 'always', { omitLastInOneLineBlock: true }],
     quotes: [1, 'single', { avoidEscape: true }],
     '@typescript-eslint/no-explicit-any': 'off',
-    'prefer-const': [1, { 'destructuring': 'all' }]
+    'prefer-const': [1, { 'destructuring': 'all' }],
+    'no-unused-vars': [2, { 'varsIgnorePattern': '^\\_' }]
   },
 };
