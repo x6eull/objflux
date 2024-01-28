@@ -78,7 +78,11 @@ export function ObjectToken({ value, expanded, onClick, mapPrototype = false, sh
           return k;
       }
     }
-    return JSON.stringify(value);
+    try {
+      return JSON.stringify(value);
+    } catch (e: any) {
+      return `[stringify failed: ${e?.message ?? String(e)}]`;
+    }
   }, [mapPrototype, value]);
   return (<TokenBase className='object' onClick={(ev) => {
     if (!onClick) return;

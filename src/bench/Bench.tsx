@@ -1,9 +1,26 @@
+import { useState } from 'react';
 import { AutoToken } from '../ValueView/ValueView';
 import './Bench.scss';
+import { Input } from '../Input/Input';
 
 export default function Bench() {
+  const [input, setInput] = useState('(()=>{return {a:10,b:{bb:{bbb:{}}}}})()');
+  const [values, setValues] = useState<any[]>(['测试中,沙箱外执行js']);
   return (<div className='bench'>
-    <ValueList items={['此功能尚在开发'.padEnd(101, 'a'), 123.456, true, false, null, undefined, 2n ** 63n, Symbol('\'"`'), { a: 1, b: Symbol(), c: { cc: { ccc: {} } } }]} />
+    <ValueList items={values} />
+    <Input onKeyDown={(ev: React.KeyboardEvent<HTMLInputElement>) => {
+      if (ev.code === 'Enter') {
+        ev.preventDefault();
+        try {
+          const newV = eval(input);
+          setInput('');
+          setValues([...values, newV]);
+        } catch (e: unknown) {
+          setInput('');
+          setValues([...values, e]);
+        }
+      }
+    }} value={input} onChange={(i: string) => { setInput(i) }}></Input>
   </div>);
 }
 

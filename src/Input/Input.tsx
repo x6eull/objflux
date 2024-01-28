@@ -12,8 +12,8 @@ export function Input(
         { title?: string, desc?: string, initialValue?: string, value?: string, onChange?: (value: string) => void, placeholder?: string, error?: boolean, seperateTitleWithInput?: boolean, seperateTitleWithDescription?: boolean, required?: boolean, maxLength?: number, type?: 'text' | 'search' } &
         ({ allowMultiline?: false, viewLines?: never } |
         { allowMultiline: true, viewLines?: number }) &
-        (DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> |
-            DetailedHTMLProps<InputHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>)
+        Omit<(DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> |
+            DetailedHTMLProps<InputHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>), 'onChange'>
 ) {
     allowMultiline ??= false;
     placeholder ??= '';
