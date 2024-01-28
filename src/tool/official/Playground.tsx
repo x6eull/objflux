@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { parseCode } from '../../core/parse';
 import { AutoTool } from '../AutoTool';
 import { Sandbox } from '../../sandbox/Sandbox';
+import { AutoToken } from '../../ValueView/ValueView';
 
 export function Playground({ source }: { source: string }) {
   const [result, setResult] = useState<React.ReactNode>(() => <div>Loading...</div>);
@@ -22,7 +23,7 @@ export function Playground({ source }: { source: string }) {
             output: { keyword: 'react.element' },
             async func(...values) {
               const output = await sandbox.eval({ withStore: [storedFuncIndex], body: 'return store[0](...args)', doReturn: true, doStore: false, doAwait: false, args: values }).timeout(100, '调用计算函数');
-              return (<>{JSON.stringify(output.result)}</>);
+              return (<><AutoToken value={output.result} /></>);
             }
           }} />);
         } catch (err: any) {
@@ -37,7 +38,5 @@ export function Playground({ source }: { source: string }) {
     }
   }, [source]);
 
-  return <div>
-    <p style={{ margin: '.3rem .8rem', color: '#00b8ff' }}>目前仅接受string类型的参数。返回值使用JSON.stringify编码后显示。</p>
-    {result}</div>;
+  return <div>{result}</div>;
 }

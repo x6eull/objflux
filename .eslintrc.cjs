@@ -15,6 +15,7 @@ module.exports = {
     quotes: [1, 'single', { avoidEscape: true }],
     '@typescript-eslint/no-explicit-any': 'off',
     'prefer-const': [1, { 'destructuring': 'all' }],
-    'no-unused-vars': [2, { 'varsIgnorePattern': '^\\_' }]
+    'no-unused-vars': [0],
+    '@typescript-eslint/no-unused-vars': [2, {}]
   },
 };

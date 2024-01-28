@@ -148,3 +148,10 @@ export function combineTokens(...tokens: (string | undefined)[]): string {
   }
   return result;
 }
+
+export function throwErr(err: string | Error, ...addtionalData: any[]): never {
+  console.error(...addtionalData);
+  if (!(err instanceof Error))
+    err = new Error(err);
+  throw err;
+}

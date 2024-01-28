@@ -1,3 +1,9 @@
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
 .bench {
 
   .value-list {
@@ -15,18 +21,13 @@
         user-select: none;
         min-width: 1.4em;
         padding: 0 .2em;
+        height: 1.5em;
         box-sizing: border-box;
         display: flex;
         flex-direction: row;
         justify-content: start;
         align-items: center;
         font-family: Consolas;
-        height: 1.6rem;
-      }
-
-      .value {
-        min-height: 1.6rem;
-        line-height: 1.6rem;
       }
     }
   }
